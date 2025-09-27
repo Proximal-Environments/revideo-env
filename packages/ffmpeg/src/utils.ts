@@ -67,47 +67,6 @@ export async function concatenateMedia(
   });
 }
 
-export async function createSilentAudioFile(
-  filePath: string,
-  duration: number,
-) {
-  ffmpeg.setFfmpegPath(ffmpegSettings.getFfmpegPath());
-
-  return new Promise((resolve, reject) => {
-    ffmpeg()
-      .addInput(`anullsrc=channel_layout=stereo:sample_rate=${48000}`)
-      .inputFormat('lavfi')
-      .duration(duration)
-      .on('end', () => {
-        resolve(filePath);
-      })
-      .on('error', err => {
-        console.error('Error creating silent audio file:', err);
-        reject(err);
-      })
-      .save(filePath);
-  });
-}
-
-export async function getVideoDuration(filePath: string): Promise<number> {
-  ffmpeg.setFfprobePath(ffmpegSettings.getFfprobePath());
-
-  return new Promise((resolve, reject) => {
-    ffmpeg.ffprobe(filePath, (err, metadata) => {
-      if (err) {
-        reject(err);
-        return;
-      }
-      const duration = metadata.format.duration;
-      if (duration) {
-        resolve(duration);
-      } else {
-        reject(new Error('Could not determine video duration.'));
-      }
-    });
-  });
-}
-
 export async function getVideoDimensions(
   filePath: string,
 ): Promise<{width: number; height: number}> {
@@ -131,15 +90,6 @@ export async function getVideoDimensions(
       reject(new Error('Could not find video dimensions in metadata'));
     });
   });
-}
-
-export async function doesFileExist(filePath: string): Promise<boolean> {
-  try {
-    await fs.promises.access(filePath, fs.constants.F_OK);
-    return true;
-  } catch {
-    return false;
-  }
 }
 
 export async function mergeAudioWithVideo(
