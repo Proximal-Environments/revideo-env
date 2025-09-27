@@ -6,7 +6,10 @@ import type {FfmpegSettings} from '@revideo/ffmpeg';
 import {
   audioCodecs,
   concatenateMedia,
+  createSilentAudioFile,
+  doesFileExist,
   extensions,
+  getVideoDuration,
   mergeAudioWithVideo,
 } from '@revideo/ffmpeg';
 import {EventName, sendEvent} from '@revideo/telemetry';
@@ -266,6 +269,7 @@ async function initializeBrowserAndStartRendering(
 
 /**
  * Collects audio and video files from each worker and returns them.
+ * If audio file does not exist, creates a silent audio file with the same duration as the video file.
  */
 async function collectAudioAndVideoFiles(
   numOfWorkers: number,
@@ -278,6 +282,11 @@ async function collectAudioAndVideoFiles(
   for (let i = 0; i < numOfWorkers; i++) {
     const videoFilePath = `${os.tmpdir()}/revideo-${outputFileName}-${i}-${hiddenFolderId}/visuals.${extensions[format]}`;
     const audioFilePath = `${os.tmpdir()}/revideo-${outputFileName}-${i}-${hiddenFolderId}/audio.wav`;
+
+    if (!(await doesFileExist(audioFilePath))) {
+      const videoDuration = await getVideoDuration(videoFilePath);
+      await createSilentAudioFile(audioFilePath, videoDuration);
+    }
 
     videoFiles.push(videoFilePath);
     audioFiles.push(audioFilePath);
@@ -470,6 +479,11 @@ export const renderPartialVideo = async ({
 
   const videoFilePath = `${os.tmpdir()}/revideo-${outputFileName}-${workerId}-${hiddenFolderId}/visuals.${extensions[format]}`;
   const audioFilePath = `${os.tmpdir()}/revideo-${outputFileName}-${workerId}-${hiddenFolderId}/audio.wav`;
+
+  if (!(await doesFileExist(audioFilePath))) {
+    const videoDuration = await getVideoDuration(videoFilePath);
+    await createSilentAudioFile(audioFilePath, videoDuration);
+  }
 
   return {audioFile: audioFilePath, videoFile: videoFilePath};
 };
