@@ -1,12 +1,12 @@
-import {makeProject} from '@revideo/core';
+import {makeProject, Vector2} from '@revideo/core';
 
 import {Audio, Img, makeScene2D, Video} from '@revideo/2d';
-import {all, chain, createRef, waitFor} from '@revideo/core';
+import {all, createRef, waitFor} from '@revideo/core';
 
 /**
  * The Revideo scene
  */
-export const scene = makeScene2D('scene', function* (view) {
+const scene = makeScene2D('scene', function* (view) {
   const logoRef = createRef<Img>();
 
   yield view.add(
@@ -38,3 +38,33 @@ export const scene = makeScene2D('scene', function* (view) {
 
   yield* all(logoRef().scale(40, 1.5), logoRef().rotation(90, 1.5));
 });
+
+
+export const project = makeProject({
+  name: 'project',
+  scenes: [scene],
+  variables: {
+    fill: 'green',
+  },
+  settings: {
+    shared: {
+      background: '#FFFFFF',
+      range: [0, Infinity],
+      size: new Vector2(640, 480),
+    },
+    preview: {
+      fps: 30,
+      resolutionScale: 1,
+    },
+    rendering: {
+      exporter: {
+        name: '@revideo/core/wasm',
+      },
+      fps: 30,
+      resolutionScale: 1,
+      colorSpace: 'srgb',
+    },
+  },
+});
+
+export default project;
