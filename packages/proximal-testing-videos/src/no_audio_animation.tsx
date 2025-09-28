@@ -43,7 +43,10 @@ export const project = makeProject({
     },
     rendering: {
       exporter: {
-        name: '@revideo/core/wasm',
+        name: '@revideo/core/ffmpeg',
+        options: {
+          format: 'mp4',
+        },
       },
       fps: 30,
       resolutionScale: 1,
