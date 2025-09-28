@@ -28,7 +28,6 @@ interface MediaAsset {
   startInVideo: number;
   endInVideo: number;
   duration: number;
-  playbackRate: number;
   volume: number;
   trimLeftInSeconds: number;
   durationInSeconds: number;
@@ -58,7 +57,6 @@ function getAssetPlacement(frames: AssetInfo[][]): MediaAsset[] {
           endInVideo: frame,
           duration: 0, // Placeholder, will be recalculated later based on frames
           durationInSeconds: 0, // Placeholder, will be calculated based on currentTime
-          playbackRate: asset.playbackRate,
           volume: asset.volume,
           trimLeftInSeconds: asset.currentTime,
         });
@@ -83,8 +81,7 @@ function getAssetPlacement(frames: AssetInfo[][]): MediaAsset[] {
     const timeInfo = assetTimeMap.get(asset.key);
     if (timeInfo) {
       // Calculate durationInSeconds based on the start and end currentTime values.
-      asset.durationInSeconds =
-        (timeInfo.end - timeInfo.start) / asset.playbackRate;
+      asset.durationInSeconds = timeInfo.end - timeInfo.start;
     }
     // Recalculate the original duration based on frame count.
     asset.duration = asset.endInVideo - asset.startInVideo + 1;
@@ -93,33 +90,6 @@ function getAssetPlacement(frames: AssetInfo[][]): MediaAsset[] {
   return assets;
 }
 
-function calculateAtempoFilters(playbackRate: number) {
-  const atempoFilters = [];
-
-  // Calculate how many times we need to 100x the speed
-  let rate = playbackRate;
-  while (rate > 100.0) {
-    atempoFilters.push('atempo=100.0');
-    rate /= 100.0;
-  }
-  // Add the last atempo filter with the remaining rate
-  if (rate > 1.0) {
-    atempoFilters.push(`atempo=${rate}`);
-  }
-
-  // Calculate how many times we need to halve the speed
-  rate = playbackRate;
-  while (rate < 0.5) {
-    atempoFilters.push('atempo=0.5');
-    rate *= 2.0;
-  }
-  // Add the last atempo filter with the remaining rate
-  if (rate < 1.0) {
-    atempoFilters.push(`atempo=${rate}`);
-  }
-
-  return atempoFilters;
-}
 async function prepareAudio(
   outputDir: string,
   tempDir: string,
@@ -132,7 +102,7 @@ async function prepareAudio(
   const sanitizedKey = asset.key.replace(/[/[\]]/g, '-');
   const outputPath = path.join(tempDir, `${sanitizedKey}.wav`);
 
-  const trimLeft = asset.trimLeftInSeconds / asset.playbackRate;
+  const trimLeft = asset.trimLeftInSeconds;
   const trimRight =
     1 / fps +
     Math.min(
@@ -151,7 +121,7 @@ async function prepareAudio(
       (assetSampleRate * padStart) / 1000,
   );
 
-  const atempoFilters = calculateAtempoFilters(asset.playbackRate); // atempo filter value must be >=0.5 and <=100. If the value is higher or lower, this function sets multiple atempo filters
+  const atempoFilters: string[] = [];
   const resolvedPath = resolvePath(outputDir, asset.src);
 
   await new Promise<void>((resolve, reject) => {
@@ -243,7 +213,7 @@ export async function generateAudio({
       );
     }
 
-    if (asset.playbackRate !== 0 && asset.volume !== 0 && hasAudioStream) {
+    if (asset.volume !== 0 && hasAudioStream) {
       const filename = await prepareAudio(
         outputDir,
         fullTempDir,

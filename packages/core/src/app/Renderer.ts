@@ -30,7 +30,6 @@ export interface AssetInfo {
   key: string;
   type: 'video' | 'audio';
   src: string;
-  playbackRate: number;
   volume: number;
   currentTime: number;
   duration: number;
