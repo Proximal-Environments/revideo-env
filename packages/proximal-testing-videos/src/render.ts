@@ -11,6 +11,11 @@ async function render() {
     settings: {
       logProgress: true,
       outFile: outFile as `${string}.mp4` | `${string}.webm` | `${string}.mov`,
+      puppeteer: {
+        executablePath: '/usr/bin/chromium',
+        args: ['--no-sandbox', '--disable-dev-shm-usage', '--single-process'],
+        headless: true
+      }
     },
   });
 
