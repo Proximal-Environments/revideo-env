@@ -5,7 +5,6 @@ import type {
 import type {FfmpegSettings} from '@revideo/ffmpeg';
 import {
   audioCodecs,
-  concatenateMedia,
   createSilentAudioFile,
   doesFileExist,
   extensions,
@@ -35,15 +34,12 @@ export interface RenderSettings {
 
   puppeteer?: PuppeteerLaunchOptions;
 
-  workers?: number;
   logProgress?: boolean;
 
   projectSettings?: RenderVideoUserProjectSettings;
 
   /**
-   * When using multiple workers, this is the port of the first worker.
-   * Each worker will increment the port by 1.
-   * If the port is already in use, the next port will be used.
+   * Port used by the Vite server.
    *
    * Default is 9000
    */
@@ -54,24 +50,18 @@ export interface RenderSettings {
    */
   viteServerOptions?: Omit<ServerOptions, 'port'>;
   viteConfig?: InlineConfig;
-  progressCallback?: (worker: number, progress: number) => void;
+  progressCallback?: (progress: number) => void;
 }
 
 /**
  * We pass a lot of render settings to the client side of the renderer
  * via the URL. This function builds the URL with the necessary parameters.
  */
-function buildUrl(
-  port: number,
-  fileName: string,
-  workerId: number,
-  totalNumOfWorkers: number,
-  hiddenFolderId: string,
-) {
+function buildUrl(port: number, fileName: string, hiddenFolderId: string) {
   const fileNameEscaped = encodeURIComponent(fileName);
   const hiddenFolderIdEscaped = encodeURIComponent(hiddenFolderId);
 
-  return `http://localhost:${port}/render?fileName=${fileNameEscaped}&workerId=${workerId}&totalNumOfWorkers=${totalNumOfWorkers}&hiddenFolderId=${hiddenFolderIdEscaped}`;
+  return `http://localhost:${port}/render?fileName=${fileNameEscaped}&hiddenFolderId=${hiddenFolderIdEscaped}`;
 }
 
 /**
@@ -124,30 +114,25 @@ async function initBrowserAndServer(
   return {browser, server, resolvedPort};
 }
 
-function trackProgress(
-  tracker: Map<number, number>,
-  id: number,
-  progress: number,
-) {
-  tracker.set(id, progress);
+function trackProgress(tracker: Map<number, number>, progress: number) {
+  tracker.set(0, progress);
 }
 
 /**
  * Navigates to the URL and renders the video on the page
  */
 async function renderVideoOnPage(
-  id: number,
   browser: Browser,
   server: ViteDevServer,
   url: string,
   progressTracker: Map<number, number>,
-  progressCallback?: (worker: number, progress: number) => void,
+  progressCallback?: (progress: number) => void,
   logProgress?: boolean,
 ) {
   function printProgress() {
     let line = '';
-    for (const [key, value] of progressTracker.entries()) {
-      line += `Render progress, worker ${key}: ${(value * 100).toFixed(0)}% `;
+    for (const value of progressTracker.values()) {
+      line += `Render progress: ${(value * 100).toFixed(0)}% `;
     }
 
     if (line === '') {
@@ -171,10 +156,7 @@ async function renderVideoOnPage(
     throw new Error('Server address is null');
   }
 
-  // only report for worker 0
-  if (id === 0) {
-    sendEvent(EventName.RenderStarted);
-  }
+  sendEvent(EventName.RenderStarted);
 
   // Attach logs from puppeteer to the console
   page.on('console', msg => {
@@ -184,16 +166,16 @@ async function renderVideoOnPage(
         continue;
       }
 
-      console.log(`Worker ${id}: ${msg.args()[i]}`);
+      console.log(msg.args()[i].toString());
     }
   });
 
   page.exposeFunction('logProgress', (progress: number) => {
     if (progressCallback) {
-      progressCallback(id, progress);
+      progressCallback(progress);
     }
     if (logProgress) {
-      trackProgress(progressTracker, id, progress);
+      trackProgress(progressTracker, progress);
     }
   });
 
@@ -228,17 +210,12 @@ async function initializeBrowserAndStartRendering(
   projectFile: string,
   outputFileName: string,
   outputFolderName: string,
-  i: number,
-  numOfWorkers: number,
   settings: RenderSettings,
   hiddenFolderId: string,
   variables?: Record<string, unknown>,
-  progressCallback?: (worker: number, progress: number) => void,
+  progressCallback?: (progress: number) => void,
 ) {
-  const port =
-    (settings.viteBasePort !== undefined ? settings.viteBasePort : 9000) + i;
-
-  const progressTracker = new Map<number, number>();
+  const port = settings.viteBasePort ?? 9000;
 
   const {browser, server, resolvedPort} = await initBrowserAndServer(
     port,
@@ -248,123 +225,65 @@ async function initializeBrowserAndStartRendering(
     variables,
   );
 
-  const url = buildUrl(
-    resolvedPort,
-    `${outputFileName}-${i}`,
-    i,
-    numOfWorkers,
-    hiddenFolderId,
-  );
+  const url = buildUrl(resolvedPort, outputFileName, hiddenFolderId);
 
   return renderVideoOnPage(
-    i,
     browser,
     server,
     url,
-    progressTracker,
+    new Map<number, number>(),
     progressCallback,
     settings.logProgress,
   );
 }
 
-/**
- * Collects audio and video files from each worker and returns them.
- * If audio file does not exist, creates a silent audio file with the same duration as the video file.
- */
-async function collectAudioAndVideoFiles(
-  numOfWorkers: number,
+async function getRenderedMedia(
   outputFileName: string,
-  hiddenFolderId: string,
   format: FfmpegExporterOptions['format'],
+  hiddenFolderId: string,
 ) {
-  const audioFiles = [];
-  const videoFiles = [];
-  for (let i = 0; i < numOfWorkers; i++) {
-    const videoFilePath = `${os.tmpdir()}/revideo-${outputFileName}-${i}-${hiddenFolderId}/visuals.${extensions[format]}`;
-    const audioFilePath = `${os.tmpdir()}/revideo-${outputFileName}-${i}-${hiddenFolderId}/audio.wav`;
+  const videoFilePath = `${os.tmpdir()}/revideo-${outputFileName}-${hiddenFolderId}/visuals.${extensions[format]}`;
+  const audioFilePath = `${os.tmpdir()}/revideo-${outputFileName}-${hiddenFolderId}/audio.wav`;
 
-    if (!(await doesFileExist(audioFilePath))) {
-      const videoDuration = await getVideoDuration(videoFilePath);
-      await createSilentAudioFile(audioFilePath, videoDuration);
-    }
-    videoFiles.push(videoFilePath);
-    audioFiles.push(audioFilePath);
+  if (!(await doesFileExist(audioFilePath))) {
+    const videoDuration = await getVideoDuration(videoFilePath);
+    await createSilentAudioFile(audioFilePath, videoDuration);
   }
 
-  return {audioFiles, videoFiles};
+  return {audioFilePath, videoFilePath};
 }
 
 /**
- * Concatenates audio and video files and merges them into a single video file.
+ * Merges audio and video into a single video file.
  */
-async function concatenateAudioAndVideoFiles(
+async function mergeRenderedMedia(
   outputFileName: string,
   outputFolder: string,
-  audioFiles: string[],
-  videoFiles: string[],
+  audioFilePath: string,
+  videoFilePath: string,
   format: FfmpegExporterOptions['format'],
 ) {
-  await concatenateMedia(
-    videoFiles,
-    path.join(outputFolder, `${outputFileName}-visuals.${extensions[format]}`),
-  );
-  await concatenateMedia(
-    audioFiles,
-    path.join(outputFolder, `${outputFileName}-audio.wav`),
-  );
   await mergeAudioWithVideo(
-    path.join(outputFolder, `${outputFileName}-audio.wav`),
-    path.join(outputFolder, `${outputFileName}-visuals.${extensions[format]}`),
+    audioFilePath,
+    videoFilePath,
     path.join(outputFolder, `${outputFileName}.${extensions[format]}`),
     audioCodecs[format],
   );
 }
 
 /**
- * Deletes all partial files after concatenation is done
+ * Deletes all temporary files after merging is done
  */
 async function cleanup(
   outputFileName: string,
-  outputFolderName: string,
-  numOfWorkers: number,
   hiddenFolderId: string,
-  format: FfmpegExporterOptions['format'],
 ) {
-  const cleanupFolders = [];
-  const cleanupFiles = [];
-  for (let i = 0; i < numOfWorkers; i++) {
-    cleanupFolders.push(
-      `${os.tmpdir()}/revideo-${outputFileName}-${i}-${hiddenFolderId}`,
-    );
-    cleanupFiles.push(
-      path.join(
-        process.cwd(),
-        outputFolderName,
-        `${outputFileName}-${i}.${extensions[format]}`,
-      ),
-    );
-  }
-
-  cleanupFiles.push(
-    path.join(process.cwd(), outputFolderName, `${outputFileName}-audio.wav`),
-  );
-  cleanupFiles.push(
-    path.join(
-      process.cwd(),
-      outputFolderName,
-      `${outputFileName}-visuals.${extensions[format]}`,
-    ),
-  );
-
-  const folderCleanupPromises = cleanupFolders.map(folder =>
-    fs.promises.rm(folder, {recursive: true, force: true}).catch(() => {}),
-  );
-
-  const fileCleanupPromises = cleanupFiles.map(file =>
-    fs.promises.unlink(file).catch(() => {}),
-  );
-
-  await Promise.all([...folderCleanupPromises, ...fileCleanupPromises]);
+  await fs.promises
+    .rm(`${os.tmpdir()}/revideo-${outputFileName}-${hiddenFolderId}`, {
+      recursive: true,
+      force: true,
+    })
+    .catch(() => {});
 }
 
 const defaultSettings: RenderSettings = {
@@ -397,92 +316,34 @@ export async function renderVideo({
   const {
     outputFileName,
     outputFolderName,
-    numOfWorkers,
     hiddenFolderId,
     format,
   } = getParamDefaultsAndCheckValidity(settings);
 
   // Start rendering
-  const renderPromises = [];
-  for (let i = 0; i < numOfWorkers; i++) {
-    renderPromises.push(
-      initializeBrowserAndStartRendering(
-        projectFile,
-        outputFileName,
-        outputFolderName,
-        i,
-        numOfWorkers,
-        settings,
-        hiddenFolderId,
-        variables,
-        settings.progressCallback,
-      ),
-    );
-  }
-
-  // Wait for workers to finish rendering
-  await Promise.all(renderPromises);
-
-  // Collect and concatenate audio and video files
-  const {audioFiles, videoFiles} = await collectAudioAndVideoFiles(
-    numOfWorkers,
-    outputFileName,
-    hiddenFolderId,
-    format,
-  );
-  await concatenateAudioAndVideoFiles(
-    outputFileName,
-    outputFolderName,
-    audioFiles,
-    videoFiles,
-    format,
-  );
-  await cleanup(
-    outputFileName,
-    outputFolderName,
-    numOfWorkers,
-    hiddenFolderId,
-    format,
-  );
-
-  return path.join(outputFolderName, `${outputFileName}.${extensions[format]}`);
-}
-
-interface RenderPartialVideoProps extends RenderVideoParams {
-  workerId: number;
-  numWorkers: number;
-  settings?: Omit<RenderSettings, 'workers'>;
-}
-
-export const renderPartialVideo = async ({
-  projectFile,
-  variables,
-  settings = defaultSettings,
-  numWorkers,
-  workerId,
-}: RenderPartialVideoProps) => {
-  const {outputFileName, outputFolderName, hiddenFolderId, format} =
-    getParamDefaultsAndCheckValidity(settings);
-
   await initializeBrowserAndStartRendering(
     projectFile,
     outputFileName,
     outputFolderName,
-    workerId,
-    numWorkers,
     settings,
     hiddenFolderId,
     variables,
     settings.progressCallback,
   );
 
-  const videoFilePath = `${os.tmpdir()}/revideo-${outputFileName}-${workerId}-${hiddenFolderId}/visuals.${extensions[format]}`;
-  const audioFilePath = `${os.tmpdir()}/revideo-${outputFileName}-${workerId}-${hiddenFolderId}/audio.wav`;
+  const {audioFilePath, videoFilePath} = await getRenderedMedia(
+    outputFileName,
+    format,
+    hiddenFolderId,
+  );
+  await mergeRenderedMedia(
+    outputFileName,
+    outputFolderName,
+    audioFilePath,
+    videoFilePath,
+    format,
+  );
+  await cleanup(outputFileName, hiddenFolderId);
 
-  if (!(await doesFileExist(audioFilePath))) {
-    const videoDuration = await getVideoDuration(videoFilePath);
-    await createSilentAudioFile(audioFilePath, videoDuration);
-  }
-
-  return {audioFile: audioFilePath, videoFile: videoFilePath};
-};
+  return path.join(outputFolderName, `${outputFileName}.${extensions[format]}`);
+}

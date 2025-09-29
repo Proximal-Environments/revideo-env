@@ -74,7 +74,7 @@ export interface UserProjectSettings {
 }
 
 /**
- * Settings that can be passed to the renderVideo / renderPartialVideo functions
+ * Settings that can be passed to the renderVideo function
  */
 
 export type RenderVideoUserProjectSettings = {

@@ -18,8 +18,6 @@ declare global {
  */
 export const render = async (
   project: Project,
-  workerId: number,
-  totalNumOfWorkers: number,
   hiddenFolderId: string,
   overwriteRenderSettings: RenderVideoUserProjectSettings,
 ) => {
@@ -32,14 +30,6 @@ export const render = async (
 
     const {firstGlobalFrame, lastGlobalFrame} =
       await getGlobalFirstAndLastFrame(project, renderer, range[0], range[1]);
-
-    const {firstWorkerFrame, lastWorkerFrame} =
-      await getWorkerFirstAndLastFrame(
-        firstGlobalFrame,
-        lastGlobalFrame,
-        workerId,
-        totalNumOfWorkers,
-      );
 
     const renderSettingsFromProject = getFullRenderingSettings(project);
 
@@ -66,8 +56,8 @@ export const render = async (
       background,
       size,
       range: [
-        renderer.frameToTime(firstWorkerFrame),
-        renderer.frameToTime(lastWorkerFrame),
+        renderer.frameToTime(firstGlobalFrame),
+        renderer.frameToTime(lastGlobalFrame),
       ] as [number, number],
     };
 
@@ -79,7 +69,7 @@ export const render = async (
 };
 
 /**
- * Calculate the first and last "global" frame, i.e. frame independent of worker
+ * Calculate the first and last frame for the requested range.
  */
 async function getGlobalFirstAndLastFrame(
   project: Project,
@@ -105,22 +95,3 @@ async function getGlobalFirstAndLastFrame(
   return {firstGlobalFrame, lastGlobalFrame};
 }
 
-async function getWorkerFirstAndLastFrame(
-  firstGlobalFrame: number,
-  lastGlobalFrame: number,
-  workerId: number,
-  totalNumOfWorkers: number,
-) {
-  const videoDurationInFrames = lastGlobalFrame - firstGlobalFrame;
-  const framesPerWorker = Math.ceil(videoDurationInFrames / totalNumOfWorkers);
-
-  const offset = workerId === 0 ? 0 : 1;
-  const firstWorkerFrame =
-    firstGlobalFrame + framesPerWorker * workerId + offset;
-  const lastWorkerFrame = Math.min(
-    firstWorkerFrame + framesPerWorker - offset,
-    lastGlobalFrame,
-  );
-
-  return {firstWorkerFrame, lastWorkerFrame};
-}

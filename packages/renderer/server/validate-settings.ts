@@ -5,28 +5,25 @@ import {v4 as uuidv4} from 'uuid';
 export function getParamDefaultsAndCheckValidity(settings: RenderSettings): {
   outputFileName: string;
   outputFolderName: string;
-  numOfWorkers: number;
   hiddenFolderId: string;
   format: FfmpegExporterOptions['format'];
 } {
   const defaultReturn = {
     outputFileName: 'video',
     outputFolderName: settings.outDir ?? './output',
-    numOfWorkers: settings.workers ?? 1,
     hiddenFolderId: uuidv4(),
   } as {
     outputFileName: string;
     outputFolderName: string;
-    numOfWorkers: number;
     hiddenFolderId: string;
   };
 
-  // Image sequence exporter is not supported in renderVideo or renderPartialVideo
+  // Image sequence exporter is not supported in renderVideo
   if (
     settings.projectSettings?.exporter?.name === '@revideo/core/image-sequence'
   ) {
     throw Error(
-      'You cannot use the image sequence exporter with renderVideo or renderPartialVideo. Please use the editor to export images',
+      'You cannot use the image sequence exporter with renderVideo. Please use the editor to export images',
     );
   }
 
