@@ -1,5 +1,4 @@
 import type {
-  AssetInfo,
   FullSceneDescription,
   Inspectable,
   InspectedAttributes,
@@ -161,51 +160,6 @@ export class Scene2D extends GeneratorScene<View2D> implements Inspectable {
     for (const node of this.registeredNodes.values()) {
       if (!node.parent() && node !== this.view) yield node;
     }
-  }
-
-  public override getMediaAssets(): Array<AssetInfo> {
-    const playingVideos = Array.from(this.registeredNodes.values())
-      .filter((node): node is Video => node instanceof Video)
-      .filter(video => (video as Video).isPlaying());
-
-    const playingAudios = Array.from(this.registeredNodes.values())
-      .filter((node): node is Audio => node instanceof Audio)
-      .filter(audio => (audio as Audio).isPlaying());
-
-    const returnObjects: AssetInfo[] = [];
-
-    returnObjects.push(
-      ...playingVideos.map(vid => ({
-        key: vid.key,
-        type: 'video' as const,
-        src: vid.src(),
-        decoder: vid.decoder(),
-        playbackRate:
-          typeof vid.playbackRate === 'function'
-            ? vid.playbackRate()
-            : vid.playbackRate,
-        volume: vid.getVolume(),
-        currentTime: vid.getCurrentTime(),
-        duration: vid.getDuration(),
-      })),
-    );
-
-    returnObjects.push(
-      ...playingAudios.map(audio => ({
-        key: audio.key,
-        type: 'audio' as const,
-        src: audio.src(),
-        playbackRate:
-          typeof audio.playbackRate === 'function'
-            ? audio.playbackRate()
-            : audio.playbackRate,
-        volume: audio.getVolume(),
-        currentTime: audio.getCurrentTime(),
-        duration: audio.getDuration(),
-      })),
-    );
-
-    return returnObjects;
   }
 
   public override stopAllMedia() {

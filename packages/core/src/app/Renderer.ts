@@ -273,7 +273,7 @@ export class Renderer {
     let lastRefresh = performance.now();
     let result = RendererResult.Success;
 
-    const mediaByFrames = await this.getMediaByFrames(settings);
+    const mediaByFrames: AssetInfo[][] = [];
 
     // Start audio export
     let generateAudioPromise;
@@ -378,43 +378,5 @@ export class Renderer {
       this.playback.currentScene.name,
       signal,
     );
-  }
-
-  private async getMediaByFrames(settings: RendererSettings) {
-    this.stage.configure(settings);
-    this.playback.fps = settings.fps;
-    this.playback.state = PlaybackState.Rendering;
-    const from = this.status.secondsToFrames(settings.range[0]);
-    this.frame.current = from;
-
-    await this.reloadScenes(settings);
-    await this.playback.recalculate();
-    await this.playback.reset();
-
-    const to = Math.min(
-      this.playback.duration,
-      this.status.secondsToFrames(settings.range[1]),
-    );
-    await this.playback.seek(from);
-
-    const mediaAssets: AssetInfo[][] = [];
-    try {
-      const currentMediaAssets = this.playback.currentScene.getMediaAssets();
-      mediaAssets.push(currentMediaAssets);
-
-      let finished = false;
-      while (!finished) {
-        await this.playback.progress();
-        mediaAssets.push(this.playback.currentScene.getMediaAssets());
-
-        if (this.playback.finished || this.playback.frame >= to) {
-          finished = true;
-        }
-      }
-    } catch (e: any) {
-      this.project.logger.error(e);
-    }
-
-    return mediaAssets;
   }
 }

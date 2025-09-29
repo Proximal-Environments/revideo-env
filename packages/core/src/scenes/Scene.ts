@@ -1,9 +1,4 @@
-import type {
-  AssetInfo,
-  Logger,
-  PlaybackStatus,
-  SharedWebGLContext,
-} from '../app';
+import type {Logger, PlaybackStatus, SharedWebGLContext} from '../app';
 import type {SubscribableEvent, SubscribableValueEvent} from '../events';
 import type {Plugin} from '../plugin';
 import type {SignalValue} from '../signals';
@@ -324,11 +319,6 @@ export interface Scene<T = unknown> {
    * Should always return `true`.
    */
   isCached(): boolean;
-
-  /**
-   * Get all media assets
-   */
-  getMediaAssets(): Array<AssetInfo>;
 
   stopAllMedia(): void;
 
