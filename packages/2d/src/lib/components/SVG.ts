@@ -12,7 +12,6 @@ import {
   Vector2,
   all,
   clampRemap,
-  delay,
   easeInOutSine,
   isReactive,
   lazy,
@@ -271,8 +270,6 @@ export class SVG extends Shape {
 
     const transformator: ThreadGenerator[] = [];
     const transformatorTime = (ending - beginning) * time;
-    const transformatorDelay = beginning * time;
-
     for (const item of diff.transformed) {
       transformator.push(
         ...this.generateTransformer(
@@ -344,7 +341,7 @@ export class SVG extends Shape {
         timingFunction,
       ),
       baseTween,
-      delay(transformatorDelay, all(...transformator)),
+      all(...transformator),
     );
   }
 

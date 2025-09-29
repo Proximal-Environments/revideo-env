@@ -1,7 +1,7 @@
 import {makeProject} from '@revideo/core';
 
 import {Audio, Img, makeScene2D, Video} from '@revideo/2d';
-import {all, chain, createRef, waitFor} from '@revideo/core';
+import {all, createRef, waitFor} from '@revideo/core';
 
 /**
  * The Revideo scene
@@ -36,8 +36,6 @@ export const scene = makeScene2D('scene', function* (view) {
     />,
   );
 
-  yield* chain(
-    all(logoRef().scale(40, 2), logoRef().rotation(360, 2)),
-    logoRef().scale(60, 1),
-  );
+  yield* all(logoRef().scale(40, 2), logoRef().rotation(360, 2));
+  yield* logoRef().scale(60, 1);
 });
