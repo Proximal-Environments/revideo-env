@@ -68,8 +68,6 @@ export function rendererPlugin(
             const url = new URL(window.location.href);
 
             const fileNameEscaped = url.searchParams.get('fileName');
-            const workerId = parseInt(url.searchParams.get('workerId'));
-            const totalNumOfWorkers = parseInt(url.searchParams.get('totalNumOfWorkers'));
             const hiddenFolderIdEscaped = url.searchParams.get('hiddenFolderId');
 
             const fileName = decodeURIComponent(fileNameEscaped);
@@ -78,7 +76,7 @@ export function rendererPlugin(
             // Overwrite project name so that the rendered videos don't overwrite each other
             project.name = fileName;
 
-            render(project, workerId, totalNumOfWorkers, hiddenFolderId, JSON.parse(\`${projectSettingsString}\`));
+            render(project, hiddenFolderId, JSON.parse(\`${projectSettingsString}\`));
             `;
       }
     },

@@ -90,9 +90,9 @@ async function renderWithoutCallback(req: Request, res: Response) {
       Connection: 'keep-alive',
     });
 
-    const sendProgress = (worker: number, progress: number) => {
+    const sendProgress = (progress: number) => {
       res.write(`event: progress\n`);
-      res.write(`data: ${JSON.stringify({worker, progress})}\n\n`);
+      res.write(`data: ${JSON.stringify({progress})}\n\n`);
     };
 
     try {
