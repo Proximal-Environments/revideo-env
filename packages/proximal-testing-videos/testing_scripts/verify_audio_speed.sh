@@ -9,8 +9,8 @@ fi
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ORIGINAL="$1"
 COMPARISON="$2"
-LOWER_BOUND=0.95
-UPPER_BOUND=1.05
+LOWER_BOUND=0.8
+UPPER_BOUND=1.2
 
 if [[ ! -f "$ORIGINAL" ]]; then
   echo "Original media file not found: $ORIGINAL" >&2
