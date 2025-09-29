@@ -82,7 +82,6 @@ async function initBrowserAndServer(
   projectFile: string,
   outputFolderName: string,
   settings: RenderSettings,
-  variables?: Record<string, unknown>,
 ) {
   const args = settings.puppeteer?.args ?? [];
   args.includes('--single-process') || args.push('--single-process');
@@ -96,7 +95,6 @@ async function initBrowserAndServer(
         motionCanvas({project: resolvedProjectPath, output: outputFolderName}),
         rendererPlugin(
           settings.projectSettings,
-          variables,
           settings.ffmpeg,
           projectFile,
         ),
@@ -232,7 +230,6 @@ async function initializeBrowserAndStartRendering(
   numOfWorkers: number,
   settings: RenderSettings,
   hiddenFolderId: string,
-  variables?: Record<string, unknown>,
   progressCallback?: (worker: number, progress: number) => void,
 ) {
   const port =
@@ -245,7 +242,6 @@ async function initializeBrowserAndStartRendering(
     projectFile,
     outputFolderName,
     settings,
-    variables,
   );
 
   const url = buildUrl(
@@ -377,23 +373,23 @@ const defaultSettings: RenderSettings = {
 
 interface RenderVideoParams {
   projectFile: string;
-  variables?: Record<string, unknown>;
   settings?: RenderSettings;
+  variables?: unknown;
 }
 
 /**
  * Renders a video to a file.
  * @param projectFile - Path to the project.ts file.
- * @param variables - Variables to pass to your project (see https://docs.re.video/parameterized-video)
  * @param progressCallback - Callback function to track rendering progress. Progress is a number between 0 and 1.
  * @param settings - Settings for the rendering process.
  * @returns - Path to the rendered video file.
  */
 export async function renderVideo({
   projectFile,
-  variables,
   settings = defaultSettings,
+  variables: _variables,
 }: RenderVideoParams): Promise<string> {
+  void _variables;
   const {
     outputFileName,
     outputFolderName,
@@ -414,7 +410,6 @@ export async function renderVideo({
         numOfWorkers,
         settings,
         hiddenFolderId,
-        variables,
         settings.progressCallback,
       ),
     );
@@ -456,7 +451,6 @@ interface RenderPartialVideoProps extends RenderVideoParams {
 
 export const renderPartialVideo = async ({
   projectFile,
-  variables,
   settings = defaultSettings,
   numWorkers,
   workerId,
@@ -472,7 +466,6 @@ export const renderPartialVideo = async ({
     numWorkers,
     settings,
     hiddenFolderId,
-    variables,
     settings.progressCallback,
   );
 

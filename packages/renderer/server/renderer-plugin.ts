@@ -13,27 +13,8 @@ function createHtml(src: string) {
   return HtmlParts[0] + src + HtmlParts[1];
 }
 
-function escapeSpecialChars(_: string, value: string) {
-  if (typeof value === 'string') {
-    /* eslint-disable no-useless-escape */
-    return value
-      .replace(/[\\]/g, '\\\\')
-      .replace(/[\"]/g, '\\"')
-      .replace(/[\/]/g, '\\/')
-      .replace(/[\b]/g, '\\b')
-      .replace(/[\f]/g, '\\f')
-      .replace(/[\n]/g, '\\n')
-      .replace(/[\r]/g, '\\r')
-      .replace(/[\t]/g, '\\t');
-    /* eslint-enable no-useless-escape */
-  }
-
-  return value;
-}
-
 export function rendererPlugin(
   projectSettings?: RenderVideoUserProjectSettings,
-  variables?: Record<string, unknown>,
   customFfmpegSettings?: FfmpegSettings,
   projectFile?: string,
 ): Plugin {
@@ -60,9 +41,6 @@ export function rendererPlugin(
             import {render} from '@revideo/renderer/lib/client/render';
             import {Vector2} from '@revideo/core';
             import project from '${projectFile}';
-
-            // Read video variables
-            project.variables = ${variables ? `JSON.parse(\`${JSON.stringify(variables, escapeSpecialChars)}\`)` : 'project.variables'};
 
             // Check range of frames to render
             const url = new URL(window.location.href);
