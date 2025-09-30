@@ -1,4 +1,4 @@
-import type {Logger, PlaybackStatus} from '../app';
+import type {AssetInfo, Logger, PlaybackStatus} from '../app';
 import {decorate, threadable} from '../decorators';
 import {EventDispatcher, ValueDispatcher} from '../events';
 import type {SignalValue} from '../signals';
@@ -98,6 +98,10 @@ export abstract class GeneratorScene<T>
 
   public get previous() {
     return this.previousScene;
+  }
+
+  public getMediaAssets(): Array<AssetInfo> {
+    return [];
   }
 
   public stopAllMedia(): void {}
