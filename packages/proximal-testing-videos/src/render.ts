@@ -8,6 +8,11 @@ async function render() {
 
   const file = await renderVideo({
     projectFile,
+    variables: {
+      color: 'blue',
+      message: 'Hello\nworld!',
+      message2: "\"double\" and / slash"
+    },
     settings: {
       logProgress: true,
       outFile: outFile as `${string}.mp4` | `${string}.webm` | `${string}.mov`,
