@@ -387,9 +387,7 @@ interface RenderVideoParams {
 export async function renderVideo({
   projectFile,
   settings = defaultSettings,
-  variables: _variables,
 }: RenderVideoParams): Promise<string> {
-  void _variables;
   const {
     outputFileName,
     outputFolderName,
