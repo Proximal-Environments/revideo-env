@@ -4,7 +4,6 @@
  */
 
 export * from './all';
-export * from './any';
 export * from './every';
 export * from './join';
 export * from './loop';
