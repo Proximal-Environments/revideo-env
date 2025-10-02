@@ -33,7 +33,8 @@ function escapeSpecialChars(_: string, value: string) {
 
 export function rendererPlugin(
   projectSettings?: RenderVideoUserProjectSettings,
-  variables?: Record<string, unknown>,
+  // variables are intentionally ignored to disable parameterized videos
+  _variables?: Record<string, unknown>,
   customFfmpegSettings?: FfmpegSettings,
   projectFile?: string,
 ): Plugin {
@@ -61,8 +62,7 @@ export function rendererPlugin(
             import {Vector2} from '@revideo/core';
             import project from '${projectFile}';
 
-            // Read video variables
-            project.variables = ${variables ? `JSON.parse(\`${JSON.stringify(variables, escapeSpecialChars)}\`)` : 'project.variables'};
+            // Project variables are not injected; defaults will be used.
 
             // Check range of frames to render
             const url = new URL(window.location.href);

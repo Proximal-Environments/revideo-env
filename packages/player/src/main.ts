@@ -216,7 +216,7 @@ class MotionCanvasPlayer extends HTMLElement {
 
     this.defaultSettings = getFullPreviewSettings(project);
     const player = new Player(project);
-    player.setVariables(this.variables);
+    // Variables are intentionally ignored; defaults will be used.
 
     this.finished = false;
     this.player?.onRender.unsubscribe(this.render);
@@ -248,8 +248,7 @@ class MotionCanvasPlayer extends HTMLElement {
         this.updateSettings();
         break;
       case 'variables':
-        this.player?.setVariables(this.variables);
-        this.player?.requestSeek(this.player.playback.frame); // reseek to update variables immediately
+        // Ignored: variables are not applied anymore.
     }
   }
 
