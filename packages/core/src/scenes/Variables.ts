@@ -4,8 +4,6 @@ import type {Scene} from './Scene';
 
 export class Variables {
   private signals: {[key: string]: SimpleSignal<any>} = {};
-  // Project variables are intentionally ignored to disable parameterized videos.
-  // Keeping the field for compatibility but it no longer affects signals.
   private variables: Record<string, unknown> = {};
 
   public constructor(private readonly scene: Scene) {
@@ -20,17 +18,20 @@ export class Variables {
    *                  variable was not configured from the outside.
    */
   public get<T>(name: string, initial: T): () => T {
-    // Always use the provided initial value. Any externally supplied
-    // project variables are intentionally ignored.
-    this.signals[name] ??= createSignal(initial);
+    this.signals[name] ??= createSignal(this.variables[name] ?? initial);
     return () => this.signals[name]();
   }
 
   /**
    * Update all signals with new project variable values.
    */
-  public updateSignals(_variables: Record<string, unknown>) {
-    // Intentionally a no-op. External variables should not update signals.
+  public updateSignals(variables: Record<string, unknown>) {
+    this.variables = variables;
+    Object.keys(variables).map(variableName => {
+      if (variableName in this.signals) {
+        this.signals[variableName](variables[variableName]);
+      }
+    });
   }
 
   /**
