@@ -357,7 +357,6 @@ export class Renderer {
         size: settings.size,
         resolutionScale: settings.resolutionScale,
       });
-      scene.variables.updateSignals(this.project.variables ?? {});
     }
   }
 

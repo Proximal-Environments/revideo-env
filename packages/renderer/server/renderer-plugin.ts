@@ -61,9 +61,6 @@ export function rendererPlugin(
             import {Vector2} from '@revideo/core';
             import project from '${projectFile}';
 
-            // Read video variables
-            project.variables = ${variables ? `JSON.parse(\`${JSON.stringify(variables, escapeSpecialChars)}\`)` : 'project.variables'};
-
             // Check range of frames to render
             const url = new URL(window.location.href);
 
