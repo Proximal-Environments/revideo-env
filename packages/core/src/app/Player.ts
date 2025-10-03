@@ -154,6 +154,7 @@ export class Player {
         experimentalFeatures: project.experimentalFeatures,
       });
       scene.onReloaded.subscribe(() => this.requestRecalculation());
+      scene.variables.updateSignals(project.variables ?? {});
       scenes.push(scene);
     }
     this.playback.setup(scenes);
@@ -297,7 +298,11 @@ export class Player {
     }
   }
 
-  public setVariables(variables: Record<string, unknown>) {}
+  public setVariables(variables: Record<string, unknown>) {
+    for (const scene of this.playback.onScenesRecalculated.current) {
+      scene.variables.updateSignals(variables);
+    }
+  }
 
   /**
    * Activate the player.
