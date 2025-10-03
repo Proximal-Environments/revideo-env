@@ -1,10 +1,5 @@
 import type {FFmpegExporterSettings} from '@revideo/ffmpeg';
-import {
-  FFmpegExporterServer,
-  VideoFrameExtractor,
-  generateAudio,
-  mergeMedia,
-} from '@revideo/ffmpeg';
+import {FFmpegExporterServer, VideoFrameExtractor, mergeMedia} from '@revideo/ffmpeg';
 import {existsSync, unlinkSync} from 'fs';
 import type {IncomingMessage, ServerResponse} from 'http';
 import type {Plugin, WebSocketServer} from 'vite';
@@ -65,21 +60,7 @@ export function ffmpegBridgePlugin({output}: ExporterPluginConfig): Plugin {
         }
       };
 
-      server.middlewares.use('/audio-processing/generate-audio', (req, res) =>
-        handlePostRequest(
-          req,
-          res,
-          async ({tempDir, assets, startFrame, endFrame, fps}) =>
-            generateAudio({
-              outputDir: output,
-              tempDir,
-              assets,
-              startFrame,
-              endFrame,
-              fps,
-            }),
-        ),
-      );
+      // Audio generation endpoint removed; audio tracks are no longer produced server-side.
 
       server.middlewares.use('/audio-processing/merge-media', (req, res) =>
         handlePostRequest(req, res, async ({outputFilename, tempDir, format}) =>

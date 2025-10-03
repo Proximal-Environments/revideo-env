@@ -70,17 +70,9 @@ export class WasmExporter implements Exporter {
     startFrame: number,
     endFrame: number,
   ): Promise<void> {
-    await fetch('/audio-processing/generate-audio', {
-      method: 'POST',
-      // TODO: add type and validate on the other side
-      body: JSON.stringify({
-        tempDir: `revideo-${this.settings.name}-${this.settings.hiddenFolderId}`,
-        assets,
-        startFrame,
-        endFrame,
-        fps: this.settings.fps,
-      }),
-    });
+    // Audio generation has been disabled for the Wasm exporter.
+    // This method is intentionally a no-op to preserve the export flow.
+    return;
   }
 
   public async mergeMedia(): Promise<void> {

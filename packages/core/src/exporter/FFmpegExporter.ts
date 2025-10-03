@@ -125,16 +125,9 @@ export class FFmpegExporterClient implements Exporter {
     startFrame: number,
     endFrame: number,
   ): Promise<void> {
-    await fetch('/audio-processing/generate-audio', {
-      method: 'POST',
-      body: JSON.stringify({
-        tempDir: `revideo-${this.settings.name}-${this.settings.hiddenFolderId}`,
-        assets,
-        startFrame,
-        endFrame,
-        fps: this.settings.fps,
-      }),
-    });
+    // Audio generation has been disabled. Keep this method as a no-op so that
+    // the rest of the export pipeline (e.g., merging or copying visuals) still runs.
+    return;
   }
 
   public async mergeMedia(): Promise<void> {
