@@ -299,9 +299,7 @@ export class Player {
   }
 
   public setVariables(variables: Record<string, unknown>) {
-    for (const scene of this.playback.onScenesRecalculated.current) {
-      scene.variables.updateSignals(variables);
-    }
+    
   }
 
   /**

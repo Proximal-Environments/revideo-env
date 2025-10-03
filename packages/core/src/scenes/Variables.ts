@@ -26,12 +26,7 @@ export class Variables {
    * Update all signals with new project variable values.
    */
   public updateSignals(variables: Record<string, unknown>) {
-    this.variables = variables;
-    Object.keys(variables).map(variableName => {
-      if (variableName in this.signals) {
-        this.signals[variableName](variables[variableName]);
-      }
-    });
+    
   }
 
   /**
