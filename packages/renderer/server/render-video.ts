@@ -82,6 +82,7 @@ async function initBrowserAndServer(
   projectFile: string,
   outputFolderName: string,
   settings: RenderSettings,
+  variables?: Record<string, unknown>,
 ) {
   const args = settings.puppeteer?.args ?? [];
   args.includes('--single-process') || args.push('--single-process');
@@ -93,7 +94,12 @@ async function initBrowserAndServer(
       configFile: false,
       plugins: [
         motionCanvas({project: resolvedProjectPath, output: outputFolderName}),
-        rendererPlugin(settings.projectSettings, undefined, settings.ffmpeg, projectFile),
+        rendererPlugin(
+          settings.projectSettings,
+          variables,
+          settings.ffmpeg,
+          projectFile,
+        ),
       ],
       ...settings.viteConfig,
       server: {
@@ -226,6 +232,7 @@ async function initializeBrowserAndStartRendering(
   numOfWorkers: number,
   settings: RenderSettings,
   hiddenFolderId: string,
+  variables?: Record<string, unknown>,
   progressCallback?: (worker: number, progress: number) => void,
 ) {
   const port =
@@ -238,6 +245,7 @@ async function initializeBrowserAndStartRendering(
     projectFile,
     outputFolderName,
     settings,
+    variables,
   );
 
   const url = buildUrl(
@@ -406,6 +414,7 @@ export async function renderVideo({
         numOfWorkers,
         settings,
         hiddenFolderId,
+        variables,
         settings.progressCallback,
       ),
     );
@@ -463,6 +472,7 @@ export const renderPartialVideo = async ({
     numWorkers,
     settings,
     hiddenFolderId,
+    variables,
     settings.progressCallback,
   );
 
