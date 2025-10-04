@@ -5,7 +5,7 @@ import type {
   ThreadGenerator,
   TimingFunction,
 } from '@revideo/core';
-import {DEFAULT, all, capitalize, threadable} from '@revideo/core';
+import {DEFAULT, all, threadable} from '@revideo/core';
 import {computed, initial, nodeName, signal} from '../decorators';
 import {is} from '../utils';
 import type {Node} from './Node';
@@ -183,21 +183,3 @@ export class Txt extends Shape {
     await this.drawChildren(context);
   }
 }
-
-[
-  'fill',
-  'stroke',
-  'lineWidth',
-  'strokeFirst',
-  'lineCap',
-  'lineJoin',
-  'lineDash',
-  'lineDashOffset',
-].forEach(prop => {
-  (Txt.prototype as any)[`getDefault${capitalize(prop)}`] = function (
-    this: Txt,
-    initial: unknown,
-  ) {
-    return (this.parentTxt() as any)?.[prop]() ?? initial;
-  };
-});
