@@ -411,6 +411,11 @@ export class Node implements Promisable<Node> {
   @signal()
   public declare readonly opacity: SimpleSignal<number, this>;
 
+  @computed()
+  public absoluteOpacity(): number {
+    return (this.parent()?.absoluteOpacity() ?? 1) * this.opacity();
+  }
+
   @filtersSignal()
   public declare readonly filters: FiltersSignal<this>;
 
@@ -1333,6 +1338,7 @@ export class Node implements Promisable<Node> {
   protected requiresCache(): boolean {
     return (
       this.cache() ||
+      this.opacity() < 1 ||
       this.compositeOperation() !== 'source-over' ||
       this.hasFilters() ||
       this.hasShadow() ||
@@ -1489,6 +1495,7 @@ export class Node implements Promisable<Node> {
    */
   protected setupDrawFromCache(context: CanvasRenderingContext2D) {
     context.globalCompositeOperation = this.compositeOperation();
+    context.globalAlpha *= this.opacity();
     if (this.hasFilters()) {
       context.filter = this.filterString();
     }
@@ -1628,6 +1635,10 @@ export class Node implements Promisable<Node> {
    * @param context - The context to draw with.
    */
   public async render(context: CanvasRenderingContext2D) {
+    if (this.absoluteOpacity() <= 0) {
+      return;
+    }
+
     context.save();
     this.transformContext(context);
 
