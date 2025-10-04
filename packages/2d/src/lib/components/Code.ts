@@ -451,7 +451,7 @@ export class Code extends Shape {
 
   @computed()
   protected drawingInfo() {
-    this.requestFontUpdate();
+    
     const context = this.cacheCanvas();
     const code = this.code();
 
@@ -467,7 +467,7 @@ export class Code extends Shape {
   }
 
   protected override desiredSize(): SerializedVector2<DesiredLength> {
-    this.requestFontUpdate();
+    
     const context = this.cacheCanvas();
     const code = this.code();
 
@@ -485,7 +485,7 @@ export class Code extends Shape {
   protected override async draw(
     context: CanvasRenderingContext2D,
   ): Promise<void> {
-    this.requestFontUpdate();
+    
     this.applyStyle(context);
     this.applyText(context);
     const size = this.computedSize();
@@ -512,11 +512,7 @@ export class Code extends Shape {
 
   protected override applyText(context: CanvasRenderingContext2D) {
     super.applyText(context);
-    context.font = this.styles.font;
-    context.textBaseline = 'top';
-    if ('letterSpacing' in context) {
-      context.letterSpacing = this.styles.letterSpacing;
-    }
+    
   }
 
   protected override collectAsyncResources(): void {
