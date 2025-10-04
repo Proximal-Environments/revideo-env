@@ -184,22 +184,3 @@ export class TxtLeaf extends Shape {
  *
  * Check out 2d/src/lib/utils/makeSignalExtensions.ts if this is confusing.
  */
-[
-  'fill',
-  'stroke',
-  'lineWidth',
-  'strokeFirst',
-  'lineCap',
-  'lineJoin',
-  'lineDash',
-  'lineDashOffset',
-].forEach(prop => {
-  (TxtLeaf.prototype as any)[`get${capitalize(prop)}`] = function (
-    this: TxtLeaf,
-  ) {
-    return (
-      (this.parentTxt() as any)?.[prop]() ??
-      (this as any)[prop].context.getInitial()
-    );
-  };
-});

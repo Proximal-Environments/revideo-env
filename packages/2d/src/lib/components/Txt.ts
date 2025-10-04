@@ -184,20 +184,3 @@ export class Txt extends Shape {
   }
 }
 
-[
-  'fill',
-  'stroke',
-  'lineWidth',
-  'strokeFirst',
-  'lineCap',
-  'lineJoin',
-  'lineDash',
-  'lineDashOffset',
-].forEach(prop => {
-  (Txt.prototype as any)[`getDefault${capitalize(prop)}`] = function (
-    this: Txt,
-    initial: unknown,
-  ) {
-    return (this.parentTxt() as any)?.[prop]() ?? initial;
-  };
-});
