@@ -152,10 +152,11 @@ export class CodeBlock extends Shape {
 
   @computed()
   protected characterSize() {
-    
+    this.requestFontUpdate();
     const context = this.cacheCanvas();
     context.save();
     this.applyStyle(context);
+    context.font = this.styles.font;
     const width = context.measureText('X').width;
     context.restore();
 
@@ -335,8 +336,10 @@ export class CodeBlock extends Shape {
   protected override async draw(context: CanvasRenderingContext2D) {
     if (!CodeBlock.initialized()) return;
 
+    this.requestFontUpdate();
     this.applyStyle(context);
-    
+    context.font = this.styles.font;
+    context.textBaseline = 'top';
     const lh = parseFloat(this.styles.lineHeight);
     const w = context.measureText('X').width;
     const size = this.computedSize();
