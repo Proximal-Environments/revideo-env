@@ -57,9 +57,7 @@ export class TxtLeaf extends Shape {
   }
 
   protected override async draw(context: CanvasRenderingContext2D) {
-    this.requestFontUpdate();
     this.applyStyle(context);
-    await document.fonts?.ready;
     this.applyText(context);
     context.font = this.styles.font;
     context.textBaseline = 'bottom';

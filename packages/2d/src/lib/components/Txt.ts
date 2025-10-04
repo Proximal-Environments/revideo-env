@@ -105,7 +105,6 @@ export class Txt extends Shape {
     timingFunction: TimingFunction,
     interpolationFunction: InterpolationFunction<string>,
   ): ThreadGenerator {
-    yield document.fonts?.ready;
     const children = this.children();
     if (children.length !== 1 || !(children[0] instanceof TxtLeaf)) {
       this.text.save();
@@ -179,7 +178,6 @@ export class Txt extends Shape {
   }
 
   protected override async draw(context: CanvasRenderingContext2D) {
-    await document.fonts?.ready;
     await this.drawChildren(context);
   }
 }

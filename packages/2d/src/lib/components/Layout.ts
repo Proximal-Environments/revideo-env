@@ -759,7 +759,6 @@ export class Layout extends Node {
   protected requestLayoutUpdate() {
     const parent = this.parentTransform();
     if (this.appendedToView()) {
-      parent?.requestFontUpdate();
       this.updateLayout();
     } else {
       parent!.requestLayoutUpdate();
@@ -781,7 +780,6 @@ export class Layout extends Node {
    */
   @computed()
   protected updateLayout() {
-    this.applyFont();
     this.applyFlex();
     if (this.layoutEnabled()) {
       const children = this.layoutChildren();
@@ -817,9 +815,7 @@ export class Layout extends Node {
    */
   @computed()
   protected requestFontUpdate() {
-    this.appendedToView();
-    this.parentTransform()?.requestFontUpdate();
-    this.applyFont();
+    return;
   }
 
   protected override getCacheBBox(): BBox {
@@ -827,7 +823,6 @@ export class Layout extends Node {
   }
 
   protected override async draw(context: CanvasRenderingContext2D) {
-    await document.fonts?.ready;
     if (this.clip()) {
       const size = this.computedSize();
       if (size.width === 0 || size.height === 0) {
@@ -968,68 +963,7 @@ export class Layout extends Node {
 
   @computed()
   protected applyFont() {
-    const loadingFonts = document.fonts
-      ? Array.from(document.fonts).filter(font => font.status === 'loading')
-      : [];
-    if (loadingFonts.length > 0) {
-      DependencyContext.collectPromise(
-        (async () => {
-          await document.fonts?.ready;
-        })(),
-      );
-    }
-
-    this.element.style.fontFamily = this.fontFamily.isInitial()
-      ? ''
-      : this.fontFamily();
-    this.element.style.fontSize = this.fontSize.isInitial()
-      ? ''
-      : `${this.fontSize()}px`;
-    this.element.style.fontStyle = this.fontStyle.isInitial()
-      ? ''
-      : this.fontStyle();
-    if (this.lineHeight.isInitial()) {
-      this.element.style.lineHeight = '';
-    } else {
-      const lineHeight = this.lineHeight();
-      this.element.style.lineHeight =
-        typeof lineHeight === 'string'
-          ? (parseFloat(lineHeight as string) / 100).toString()
-          : `${lineHeight}px`;
-    }
-    this.element.style.fontWeight = this.fontWeight.isInitial()
-      ? ''
-      : this.fontWeight().toString();
-    this.element.style.letterSpacing = this.letterSpacing.isInitial()
-      ? ''
-      : `${this.letterSpacing()}px`;
-
-    this.element.style.textAlign = this.textAlign.isInitial()
-      ? ''
-      : this.textAlign();
-
-    if (this.textWrap.isInitial()) {
-      this.element.style.whiteSpace = '';
-      return;
-    }
-
-    const wrap = this.textWrap();
-
-    if (typeof wrap === 'boolean') {
-      this.element.style.whiteSpace = wrap ? 'normal' : 'nowrap';
-      return;
-    }
-
-    if (wrap === 'pre') {
-      this.element.style.whiteSpace = wrap;
-      return;
-    }
-
-    if (wrap === 'balance') {
-      this.element.style.whiteSpace = 'normal';
-      this.element.style.textWrap = wrap;
-      return;
-    }
+    return;
   }
 
   public override dispose() {
