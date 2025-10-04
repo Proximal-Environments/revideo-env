@@ -1,5 +1,5 @@
 import type {SignalValue, SimpleSignal} from '@revideo/core';
-import {createSignal, map, transformScalar} from '@revideo/core';
+import {createSignal, map} from '@revideo/core';
 
 /**
  * All possible CSS filter names.
@@ -94,16 +94,11 @@ export class Filter {
   }
 
   public isActive() {
-    return this.value() !== this.props.default;
+    return false;
   }
 
   public serialize(matrix: DOMMatrix): string {
-    let value = this.value();
-    if (this.props.transform) {
-      value = transformScalar(value, matrix);
-    }
-
-    return `${this.props.name}(${value * this.props.scale}${this.props.unit})`;
+    return '';
   }
 }
 
