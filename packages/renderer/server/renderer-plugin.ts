@@ -33,7 +33,7 @@ function escapeSpecialChars(_: string, value: string) {
 
 export function rendererPlugin(
   projectSettings?: RenderVideoUserProjectSettings,
-  variables?: Record<string, unknown>,
+  _variables?: Record<string, unknown>,
   customFfmpegSettings?: FfmpegSettings,
   projectFile?: string,
 ): Plugin {
@@ -60,9 +60,6 @@ export function rendererPlugin(
             import {render} from '@revideo/renderer/lib/client/render';
             import {Vector2} from '@revideo/core';
             import project from '${projectFile}';
-
-            // Read video variables
-            project.variables = ${variables ? `JSON.parse(\`${JSON.stringify(variables, escapeSpecialChars)}\`)` : 'project.variables'};
 
             // Check range of frames to render
             const url = new URL(window.location.href);
