@@ -50,10 +50,7 @@ import {
   vector2Signal,
   wrapper,
 } from '../decorators';
-import type {FiltersSignal} from '../decorators/filtersSignal';
-import {filtersSignal} from '../decorators/filtersSignal';
 import {spacingSignal} from '../decorators/spacingSignal';
-import type {Filter} from '../partials';
 import type {
   PossibleShaderConfig,
   ShaderConfig,
@@ -88,7 +85,6 @@ export interface NodeProps {
   zIndex?: SignalValue<number>;
 
   opacity?: SignalValue<number>;
-  filters?: SignalValue<Filter[]>;
 
   shadowColor?: SignalValue<PossibleColor>;
   shadowBlur?: SignalValue<number>;
@@ -416,9 +412,6 @@ export class Node implements Promisable<Node> {
     return (this.parent()?.absoluteOpacity() ?? 1) * this.opacity();
   }
 
-  @filtersSignal()
-  public declare readonly filters: FiltersSignal<this>;
-
   @initial('#0000')
   @colorSignal()
   public declare readonly shadowColor: ColorSignal<this>;
@@ -443,11 +436,6 @@ export class Node implements Promisable<Node> {
   >;
 
   @computed()
-  protected hasFilters(): boolean {
-    return !!this.filters().find(filter => filter.isActive());
-  }
-
-  @computed()
   protected hasShadow() {
     return (
       !!this.shadowColor() &&
@@ -455,19 +443,6 @@ export class Node implements Promisable<Node> {
         this.shadowOffset.x() !== 0 ||
         this.shadowOffset.y() !== 0)
     );
-  }
-
-  @computed()
-  protected filterString(): string {
-    let filters = '';
-    const matrix = this.compositeToWorld();
-    for (const filter of this.filters()) {
-      if (filter.isActive()) {
-        filters += ' ' + filter.serialize(matrix);
-      }
-    }
-
-    return filters;
   }
 
   /**
@@ -1340,7 +1315,6 @@ export class Node implements Promisable<Node> {
       this.cache() ||
       this.opacity() < 1 ||
       this.compositeOperation() !== 'source-over' ||
-      this.hasFilters() ||
       this.hasShadow() ||
       this.shaders().length > 0
     );
@@ -1430,9 +1404,7 @@ export class Node implements Promisable<Node> {
     const shadowOffset = transformVector(this.shadowOffset(), matrix);
     const shadowBlur = transformScalar(this.shadowBlur(), matrix);
 
-    const result = this.cacheBBox().expand(
-      this.filters.blur() * 2 + shadowBlur,
-    );
+    const result = this.cacheBBox().expand(shadowBlur);
 
     if (shadowOffset.x < 0) {
       result.x += shadowOffset.x;
@@ -1496,9 +1468,6 @@ export class Node implements Promisable<Node> {
   protected setupDrawFromCache(context: CanvasRenderingContext2D) {
     context.globalCompositeOperation = this.compositeOperation();
     context.globalAlpha *= this.opacity();
-    if (this.hasFilters()) {
-      context.filter = this.filterString();
-    }
     if (this.hasShadow()) {
       const matrix = this.compositeToWorld();
       const offset = transformVector(this.shadowOffset(), matrix);
