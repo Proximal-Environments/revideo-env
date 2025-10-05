@@ -15,10 +15,6 @@ export interface VideoProps extends MediaProps {
    */
   alpha?: SignalValue<number>;
   /**
-   * {@inheritDoc Video.smoothing}
-   */
-  smoothing?: SignalValue<boolean>;
-  /**
    * {@inheritDoc Video.decoder}
    */
   decoder?: SignalValue<'web' | 'ffmpeg' | 'slow' | null>;
@@ -36,19 +32,6 @@ export class Video extends Media {
   @initial(1)
   @signal()
   public declare readonly alpha: SimpleSignal<number, this>;
-
-  /**
-   * Whether the video should be smoothed.
-   *
-   * @remarks
-   * When disabled, the video will be scaled using the nearest neighbor
-   * interpolation with no smoothing. The resulting video will appear pixelated.
-   *
-   * @defaultValue true
-   */
-  @initial(true)
-  @signal()
-  public declare readonly smoothing: SimpleSignal<boolean, this>;
 
   /**
    * Which decoder to use during rendering. The `web` decoder is the fastest
@@ -294,7 +277,6 @@ export class Video extends Media {
       if (alpha < 1) {
         context.globalAlpha *= alpha;
       }
-      context.imageSmoothingEnabled = this.smoothing();
       drawImage(context, video, box);
       context.restore();
     }
