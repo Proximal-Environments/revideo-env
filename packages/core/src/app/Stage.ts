@@ -8,7 +8,6 @@ export interface StageSettings {
   size: Vector2;
   resolutionScale: number;
   colorSpace: CanvasColorSpace;
-  background: Color | string | null;
 }
 
 /**
@@ -17,7 +16,6 @@ export interface StageSettings {
 export class Stage {
   // TODO Consider adding pooling for canvases.
 
-  private background: string | null = null;
   private resolutionScale = 1;
   private colorSpace: CanvasColorSpace = 'srgb';
   private size = Vector2.zero;
@@ -49,7 +47,6 @@ export class Stage {
     colorSpace = this.colorSpace,
     size = this.size,
     resolutionScale = this.resolutionScale,
-    background = this.background,
   }: Partial<StageSettings>) {
     if (colorSpace !== this.colorSpace) {
       this.colorSpace = colorSpace;
@@ -68,11 +65,6 @@ export class Stage {
       this.resizeCanvas(this.currentContext);
       this.resizeCanvas(this.previousContext);
     }
-
-    this.background =
-      typeof background === 'string'
-        ? background
-        : (background?.serialize() ?? null);
   }
 
   public async render(currentScene: Scene, previousScene: Scene | null) {
@@ -88,12 +80,6 @@ export class Stage {
 
     const size = this.canvasSize;
     this.context.clearRect(0, 0, size.width, size.height);
-    if (this.background) {
-      this.context.save();
-      this.context.fillStyle = this.background;
-      this.context.fillRect(0, 0, size.width, size.height);
-      this.context.restore();
-    }
 
     if (previousScene && !previousOnTop) {
       this.context.drawImage(this.previousBuffer, 0, 0);
