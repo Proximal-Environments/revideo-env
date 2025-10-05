@@ -137,12 +137,13 @@ export class CodeBlock extends Shape {
       return [];
     }
 
-    return parse(this.code(), {codeStyle: this.theme()});
+    return parse(this.code());
   }
 
   public constructor({children, ...rest}: CodeProps) {
     super({
       fontFamily: 'monospace',
+      fill: '#c9d1d9',
       ...rest,
     });
     if (children) {
@@ -291,8 +292,8 @@ export class CodeBlock extends Shape {
     if (typeof code === 'function') throw new Error();
     if (!CodeBlock.initialized()) return;
 
-    const currentParsedCode = parse(this.code(), {codeStyle: this.theme()});
-    const newParsedCode = parse(code, {codeStyle: this.theme()});
+    const currentParsedCode = parse(this.code());
+    const newParsedCode = parse(code);
     this.currentLineCount = this.getLineCountOfTokenArray(currentParsedCode);
     this.newLineCount = this.getLineCountOfTokenArray(newParsedCode);
 
@@ -305,7 +306,7 @@ export class CodeBlock extends Shape {
     const ending = 0.8;
 
     this.codeProgress(0);
-    this.diffed = diff(this.code(), code, {codeStyle: this.theme()});
+    this.diffed = diff(this.code(), code);
     yield* tween(
       time,
       value => {
@@ -375,7 +376,6 @@ export class CodeBlock extends Shape {
       const position = {x: 0, y: 0};
       for (const token of parsed) {
         context.save();
-        context.fillStyle = token.color ?? '#c9d1d9';
         drawToken(token.code, position);
         context.restore();
       }
@@ -386,7 +386,6 @@ export class CodeBlock extends Shape {
       const overlap = 0.15;
       for (const token of diffed) {
         context.save();
-        context.fillStyle = token.color ?? '#c9d1d9';
 
         if (token.morph === 'delete') {
           drawToken(
