@@ -9,7 +9,6 @@ export {default as DefaultPlugin} from './plugin/DefaultPlugin';
 export * from './scenes';
 export * from './signals';
 export * from './threading';
-export * from './transitions';
 export * from './tweening';
 export * from './types';
 export * from './utils';
