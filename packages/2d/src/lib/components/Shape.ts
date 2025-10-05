@@ -95,15 +95,17 @@ export abstract class Shape extends Layout {
 
   protected drawShape(context: CanvasRenderingContext2D) {
     const path = this.getPath();
-    const hasStroke = false;
+    const hasStroke = this.lineWidth() > 0 && this.stroke() !== null;
     const hasFill = this.fill() !== null;
     context.save();
     this.applyStyle(context);
     this.drawRipple(context);
     if (this.strokeFirst()) {
+      hasStroke && context.stroke(path);
       hasFill && context.fill(path);
     } else {
       hasFill && context.fill(path);
+      hasStroke && context.stroke(path);
     }
     context.restore();
   }

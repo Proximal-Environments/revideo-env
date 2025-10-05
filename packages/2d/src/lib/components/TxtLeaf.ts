@@ -107,7 +107,15 @@ export class TxtLeaf extends Shape {
   ) {
     const y = box.y;
     text = text.replace(/\s+/g, ' ');
-    context.fillText(text, box.x, y);
+    if (this.lineWidth() <= 0) {
+      context.fillText(text, box.x, y);
+    } else if (this.strokeFirst()) {
+      context.strokeText(text, box.x, y);
+      context.fillText(text, box.x, y);
+    } else {
+      context.fillText(text, box.x, y);
+      context.strokeText(text, box.x, y);
+    }
   }
 
   protected override getCacheBBox(): BBox {
