@@ -47,6 +47,10 @@ export interface ImgProps extends RectProps {
    * {@inheritDoc Img.alpha}
    */
   alpha?: SignalValue<number>;
+  /**
+   * {@inheritDoc Img.smoothing}
+   */
+  smoothing?: SignalValue<boolean>;
 }
 
 /**
@@ -126,6 +130,19 @@ export class Img extends Rect {
   @initial(1)
   @signal()
   public declare readonly alpha: SimpleSignal<number, this>;
+
+  /**
+   * Whether the image should be smoothed.
+   *
+   * @remarks
+   * When disabled, the image will be scaled using the nearest neighbor
+   * interpolation with no smoothing. The resulting image will appear pixelated.
+   *
+   * @defaultValue true
+   */
+  @initial(true)
+  @signal()
+  public declare readonly smoothing: SimpleSignal<boolean, this>;
 
   public constructor(props: ImgProps) {
     super(props);
@@ -212,6 +229,7 @@ about working with images.`,
     const image = this.image();
     context.canvas.width = image.naturalWidth;
     context.canvas.height = image.naturalHeight;
+    context.imageSmoothingEnabled = this.smoothing();
     context.drawImage(image, 0, 0);
 
     return context;
@@ -227,6 +245,7 @@ about working with images.`,
       if (alpha < 1) {
         context.globalAlpha *= alpha;
       }
+      context.imageSmoothingEnabled = this.smoothing();
       drawImage(context, this.image(), box);
       context.restore();
     }
