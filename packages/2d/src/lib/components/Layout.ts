@@ -828,18 +828,6 @@ export class Layout extends Node {
 
   protected override async draw(context: CanvasRenderingContext2D) {
     await document.fonts?.ready;
-    if (this.clip()) {
-      const size = this.computedSize();
-      if (size.width === 0 || size.height === 0) {
-        return;
-      }
-
-      context.beginPath();
-      context.rect(size.width / -2, size.height / -2, size.width, size.height);
-      context.closePath();
-      context.clip();
-    }
-
     await this.drawChildren(context);
   }
 
