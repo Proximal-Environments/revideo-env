@@ -1,13 +1,15 @@
 import type {BBox, Spacing} from '@revideo/core';
 import {Color, Vector2} from '@revideo/core';
 import type {CanvasStyle, PossibleCanvasStyle} from '../partials';
-import {Pattern} from '../partials';
+import {Gradient, Pattern} from '../partials';
 
 export function canvasStyleParser(style: PossibleCanvasStyle) {
   if (style === null) {
     return null;
   }
-  
+  if (style instanceof Gradient) {
+    return style;
+  }
   if (style instanceof Pattern) {
     return style;
   }
@@ -25,7 +27,9 @@ export function resolveCanvasStyle(
   if (style instanceof Color) {
     return (<Color>style).serialize();
   }
-  
+  if (style instanceof Gradient) {
+    return style.canvasGradient(context);
+  }
   if (style instanceof Pattern) {
     return style.canvasPattern(context) ?? '';
   }
