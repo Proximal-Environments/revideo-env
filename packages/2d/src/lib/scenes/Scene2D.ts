@@ -184,7 +184,7 @@ export class Scene2D extends GeneratorScene<View2D> implements Inspectable {
           typeof vid.playbackRate === 'function'
             ? vid.playbackRate()
             : vid.playbackRate,
-        volume: 1,
+        volume: vid.getVolume(),
         currentTime: vid.getCurrentTime(),
         duration: vid.getDuration(),
       })),
@@ -199,7 +199,7 @@ export class Scene2D extends GeneratorScene<View2D> implements Inspectable {
           typeof audio.playbackRate === 'function'
             ? audio.playbackRate()
             : audio.playbackRate,
-        volume: 1,
+        volume: audio.getVolume(),
         currentTime: audio.getCurrentTime(),
         duration: audio.getDuration(),
       })),
