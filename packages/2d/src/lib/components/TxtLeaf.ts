@@ -63,6 +63,9 @@ export class TxtLeaf extends Shape {
     this.applyText(context);
     context.font = this.styles.font;
     context.textBaseline = 'bottom';
+    if ('letterSpacing' in context) {
+      context.letterSpacing = `${this.letterSpacing()}px`;
+    }
     const fontOffset = context.measureText('').fontBoundingBoxAscent;
 
     const parentRect = this.element.getBoundingClientRect();
