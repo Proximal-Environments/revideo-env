@@ -100,13 +100,8 @@ export abstract class Shape extends Layout {
     context.save();
     this.applyStyle(context);
     this.drawRipple(context);
-    if (this.strokeFirst()) {
-      hasStroke && context.stroke(path);
-      hasFill && context.fill(path);
-    } else {
-      hasFill && context.fill(path);
-      hasStroke && context.stroke(path);
-    }
+    hasFill && context.fill(path);
+    hasStroke && context.stroke(path);
     context.restore();
   }
 
