@@ -64,8 +64,8 @@ export class FFmpegExporterServer {
 
     // Output settings
     const size = {
-      x: Math.round(settings.size.x),
-      y: Math.round(settings.size.y),
+      x: Math.round(settings.size.x * settings.resolutionScale),
+      y: Math.round(settings.size.y * settings.resolutionScale),
     };
     this.command
       .output(path.join(this.jobFolder, `visuals.${extensions[this.format]}`))

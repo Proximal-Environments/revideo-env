@@ -25,6 +25,7 @@ export interface PlayerSettings {
   range: [number, number];
   fps: number;
   size: Vector2;
+  resolutionScale: number;
 }
 
 /**
@@ -136,7 +137,7 @@ export class Player {
     this.playback = new PlaybackManager();
     this.status = new PlaybackStatus(this.playback);
     this.size = settings.size ?? new Vector2(1920, 1080);
-    this.resolutionScale = 1;
+    this.resolutionScale = settings.resolutionScale ?? 1;
     this.startTime = settings.range?.[0] ?? 0;
     this.endTime = settings.range?.[1] ?? Infinity;
     this.playback.fps = settings.fps ?? 60;
@@ -148,7 +149,7 @@ export class Player {
         playback: this.status,
         logger: this.project.logger,
         size: this.size,
-        resolutionScale: 1,
+        resolutionScale: this.resolutionScale,
         sharedWebGLContext: this.sharedWebGLContext,
         experimentalFeatures: project.experimentalFeatures,
       });
@@ -173,11 +174,15 @@ export class Player {
       frame = Math.floor(frame * ratio);
       recalculate = true;
     }
-    if (!settings.size.exactlyEquals(this.size)) {
+    if (
+      !settings.size.exactlyEquals(this.size) ||
+      settings.resolutionScale !== this.resolutionScale
+    ) {
       this.size = settings.size;
+      this.resolutionScale = settings.resolutionScale;
       this.playback.reload({
         size: this.size,
-        resolutionScale: 1,
+        resolutionScale: this.resolutionScale,
       });
     }
 

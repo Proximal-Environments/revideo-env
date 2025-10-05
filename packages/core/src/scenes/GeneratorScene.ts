@@ -125,7 +125,7 @@ export abstract class GeneratorScene<T>
   ) {
     this.name = description.name;
     this.size = description.size;
-    this.resolutionScale = 1;
+    this.resolutionScale = description.resolutionScale;
     this.logger = description.logger;
     this.playback = description.playback;
     this.runnerFactory = description.config;
@@ -185,7 +185,7 @@ export abstract class GeneratorScene<T>
       this.size = size;
     }
     if (resolutionScale) {
-      this.resolutionScale = 1;
+      this.resolutionScale = resolutionScale;
     }
     if (stack) {
       this.creationStack = stack;

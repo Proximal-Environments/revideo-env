@@ -6,6 +6,7 @@ import {getContext} from '../utils';
 
 export interface StageSettings {
   size: Vector2;
+  resolutionScale: number;
   colorSpace: CanvasColorSpace;
   background: Color | string | null;
 }
@@ -30,7 +31,7 @@ export class Stage {
   private previousContext: CanvasRenderingContext2D;
 
   private get canvasSize() {
-    return this.size;
+    return this.size.scale(this.resolutionScale);
   }
 
   public constructor() {
@@ -47,6 +48,7 @@ export class Stage {
   public configure({
     colorSpace = this.colorSpace,
     size = this.size,
+    resolutionScale = this.resolutionScale,
     background = this.background,
   }: Partial<StageSettings>) {
     if (colorSpace !== this.colorSpace) {
@@ -56,7 +58,11 @@ export class Stage {
       this.previousContext = getContext({colorSpace}, this.previousBuffer);
     }
 
-    if (!size.exactlyEquals(this.size)) {
+    if (
+      !size.exactlyEquals(this.size) ||
+      resolutionScale !== this.resolutionScale
+    ) {
+      this.resolutionScale = resolutionScale;
       this.size = size;
       this.resizeCanvas(this.context);
       this.resizeCanvas(this.currentContext);

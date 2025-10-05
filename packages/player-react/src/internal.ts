@@ -286,18 +286,11 @@ class RevideoPlayer extends HTMLElement {
     const settings = {
       ...this.defaultSettings,
       size: new Vector2(this.width, this.height),
+      resolutionScale: this.quality,
       fps: this.fps,
     };
-    this.stage.configure({
-      size: settings.size,
-      colorSpace: settings.colorSpace,
-      background: settings.background,
-    });
-    this.player?.configure({
-      range: settings.range,
-      fps: settings.fps,
-      size: settings.size,
-    });
+    this.stage.configure(settings);
+    this.player?.configure(settings);
   }
 }
 
