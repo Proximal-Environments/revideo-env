@@ -284,20 +284,14 @@ export class Video extends Media {
 
   protected override async draw(context: CanvasRenderingContext2D) {
     this.drawShape(context);
-    const alpha = this.alpha();
-    if (alpha > 0) {
-      const video = await this.seekFunction();
+    const video = await this.seekFunction();
 
-      const box = BBox.fromSizeCentered(this.computedSize());
-      context.save();
-      context.clip(this.getPath());
-      if (alpha < 1) {
-        context.globalAlpha *= alpha;
-      }
-      context.imageSmoothingEnabled = this.smoothing();
-      drawImage(context, video, box);
-      context.restore();
-    }
+    const box = BBox.fromSizeCentered(this.computedSize());
+    context.save();
+    context.clip(this.getPath());
+    context.imageSmoothingEnabled = this.smoothing();
+    drawImage(context, video, box);
+    context.restore();
 
     if (this.clip()) {
       context.clip(this.getPath());
