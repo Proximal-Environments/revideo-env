@@ -273,15 +273,7 @@ export abstract class Curve extends Shape {
     }
 
     const distance = end - start;
-    const arrowSize = Math.min(distance / 2, this.arrowSize());
-
-    if (this.startArrow()) {
-      start += arrowSize / 2;
-    }
-
-    if (this.endArrow()) {
-      end -= arrowSize / 2;
-    }
+    const arrowSize = 0;
 
     let length = 0;
     let startPoint = null;
@@ -377,13 +369,11 @@ export abstract class Curve extends Shape {
 
   protected override getCacheBBox(): BBox {
     const box = this.childrenBBox();
-    const arrowSize =
-      this.startArrow() || this.endArrow() ? this.arrowSize() : 0;
     const lineWidth = this.lineWidth();
 
     const coefficient = this.lineWidthCoefficient();
 
-    return box.expand(Math.max(0, arrowSize, lineWidth * coefficient));
+    return box.expand(Math.max(0, lineWidth * coefficient));
   }
 
   protected lineWidthCoefficient(): number {
@@ -402,54 +392,13 @@ export abstract class Curve extends Shape {
     return (
       !this.start.isInitial() ||
       !this.startOffset.isInitial() ||
-      !this.startArrow.isInitial() ||
       !this.end.isInitial() ||
       !this.endOffset.isInitial() ||
-      !this.endArrow.isInitial()
+      false
     );
   }
 
   protected override drawShape(context: CanvasRenderingContext2D) {
     super.drawShape(context);
-    if (this.startArrow() || this.endArrow()) {
-      this.drawArrows(context);
-    }
-  }
-
-  private drawArrows(context: CanvasRenderingContext2D) {
-    const {startPoint, startTangent, endPoint, endTangent, arrowSize} =
-      this.curveDrawingInfo();
-    if (arrowSize < 0.001) {
-      return;
-    }
-
-    context.save();
-    context.beginPath();
-    if (this.endArrow()) {
-      this.drawArrow(context, endPoint, endTangent.flipped, arrowSize);
-    }
-    if (this.startArrow()) {
-      this.drawArrow(context, startPoint, startTangent, arrowSize);
-    }
-    context.fillStyle = resolveCanvasStyle(this.stroke(), context);
-    context.closePath();
-    context.fill();
-    context.restore();
-  }
-
-  private drawArrow(
-    context: CanvasRenderingContext2D | Path2D,
-    center: Vector2,
-    tangent: Vector2,
-    arrowSize: number,
-  ) {
-    const normal = tangent.perpendicular;
-    const origin = center.add(tangent.scale(-arrowSize / 2));
-
-    moveTo(context, origin);
-    lineTo(context, origin.add(tangent.add(normal).scale(arrowSize)));
-    lineTo(context, origin.add(tangent.sub(normal).scale(arrowSize)));
-    lineTo(context, origin);
-    context.closePath();
   }
 }
