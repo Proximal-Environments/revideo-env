@@ -8,6 +8,7 @@ export * from './Grid';
 export * from './Icon';
 export * from './Img';
 export * from './Knot';
+export * from './Latex';
 export * from './Layout';
 export * from './Line';
 export * from './Media';
