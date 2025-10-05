@@ -157,9 +157,6 @@ export class Polygon extends Curve {
 
     return this.createPath();
   }
-  protected override getRipplePath(): Path2D {
-    return this.createPath(this.rippleSize());
-  }
 
   protected createPath(expand = 0) {
     const path = new Path2D();

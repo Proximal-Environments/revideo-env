@@ -169,19 +169,5 @@ export class Rect extends Curve {
     return path;
   }
 
-  protected override getCacheBBox(): BBox {
-    return super.getCacheBBox().expand(this.rippleSize());
-  }
-
-  protected override getRipplePath(): Path2D {
-    const path = new Path2D();
-    const rippleSize = this.rippleSize();
-    const radius = this.radius().addScalar(rippleSize);
-    const smoothCorners = this.smoothCorners();
-    const cornerSharpness = this.cornerSharpness();
-    const box = BBox.fromSizeCentered(this.size()).expand(rippleSize);
-    drawRoundRect(path, box, radius, smoothCorners, cornerSharpness);
-
-    return path;
-  }
+  
 }
