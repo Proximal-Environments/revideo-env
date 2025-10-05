@@ -29,7 +29,6 @@ interface MediaAsset {
   endInVideo: number;
   duration: number;
   playbackRate: number;
-  volume: number;
   trimLeftInSeconds: number;
   durationInSeconds: number;
 }
@@ -59,7 +58,6 @@ function getAssetPlacement(frames: AssetInfo[][]): MediaAsset[] {
           duration: 0, // Placeholder, will be recalculated later based on frames
           durationInSeconds: 0, // Placeholder, will be calculated based on currentTime
           playbackRate: asset.playbackRate,
-          volume: asset.volume,
           trimLeftInSeconds: asset.currentTime,
         });
       } else {
@@ -160,7 +158,6 @@ async function prepareAudio(
       `atrim=start=${trimLeft}:end=${trimRight}`,
       `apad=pad_len=${padEnd}`,
       `adelay=${padStart}|${padStart}|${padStart}`,
-      `volume=${asset.volume}`,
     ].join(',');
 
     ffmpeg.setFfmpegPath(ffmpegSettings.getFfmpegPath());
@@ -243,7 +240,7 @@ export async function generateAudio({
       );
     }
 
-    if (asset.playbackRate !== 0 && asset.volume !== 0 && hasAudioStream) {
+    if (asset.playbackRate !== 0 && hasAudioStream) {
       const filename = await prepareAudio(
         outputDir,
         fullTempDir,
