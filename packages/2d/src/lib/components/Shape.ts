@@ -1,5 +1,11 @@
 import type {BBox, SignalValue, SimpleSignal} from '@revideo/core';
-import {threadable} from '@revideo/core';
+import {
+  createSignal,
+  easeOutExpo,
+  linear,
+  map,
+  threadable,
+} from '@revideo/core';
 import {computed, initial, nodeName, signal} from '../decorators';
 import type {CanvasStyleSignal} from '../decorators/canvasStyleSignal';
 import {canvasStyleSignal} from '../decorators/canvasStyleSignal';
@@ -48,6 +54,13 @@ export abstract class Shape extends Layout {
   @signal()
   public declare readonly antialiased: SimpleSignal<boolean, this>;
 
+  protected readonly rippleStrength = createSignal<number, this>(0);
+
+  @computed()
+  protected rippleSize() {
+    return easeOutExpo(this.rippleStrength(), 0, 50);
+  }
+
   public constructor(props: ShapeProps) {
     super(props);
   }
@@ -86,6 +99,7 @@ export abstract class Shape extends Layout {
     const hasFill = this.fill() !== null;
     context.save();
     this.applyStyle(context);
+    this.drawRipple(context);
     if (this.strokeFirst()) {
       hasStroke && context.stroke(path);
       hasFill && context.fill(path);
@@ -105,6 +119,25 @@ export abstract class Shape extends Layout {
     return new Path2D();
   }
 
+  protected getRipplePath(): Path2D {
+    return new Path2D();
+  }
+
+  protected drawRipple(context: CanvasRenderingContext2D) {
+    const rippleStrength = this.rippleStrength();
+    if (rippleStrength > 0) {
+      const ripplePath = this.getRipplePath();
+      context.save();
+      context.globalAlpha *= map(0.54, 0, rippleStrength);
+      context.fill(ripplePath);
+      context.restore();
+    }
+  }
+
   @threadable()
-  public *ripple(duration = 1) {}
+  public *ripple(duration = 1) {
+    this.rippleStrength(0);
+    yield* this.rippleStrength(1, duration, linear);
+    this.rippleStrength(0);
+  }
 }

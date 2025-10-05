@@ -233,7 +233,13 @@ export class Circle extends Curve {
     return this.createPath();
   }
 
-  
+  protected override getRipplePath(): Path2D {
+    return this.createPath(this.rippleSize());
+  }
+
+  protected override getCacheBBox(): BBox {
+    return super.getCacheBBox().expand(this.rippleSize());
+  }
 
   protected createPath(expand = 0) {
     const path = new Path2D();
