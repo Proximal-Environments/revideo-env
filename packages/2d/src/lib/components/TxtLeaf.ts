@@ -141,13 +141,7 @@ export class TxtLeaf extends Shape {
   protected override updateLayout() {
     this.applyFont();
     this.applyFlex();
-
-    // Make sure the text is aligned correctly even if the text is smaller than
-    // the container.
-    if (this.justifyContent.isInitial()) {
-      this.element.style.justifyContent =
-        this.styles.getPropertyValue('text-align');
-    }
+    
 
     const wrap =
       this.styles.whiteSpace !== 'nowrap' && this.styles.whiteSpace !== 'pre';
