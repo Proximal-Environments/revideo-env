@@ -411,9 +411,6 @@ export abstract class Curve extends Shape {
 
   protected override drawShape(context: CanvasRenderingContext2D) {
     super.drawShape(context);
-    if (this.startArrow() || this.endArrow()) {
-      this.drawArrows(context);
-    }
   }
 
   private drawArrows(context: CanvasRenderingContext2D) {
