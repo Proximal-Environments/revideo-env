@@ -514,9 +514,6 @@ export class Code extends Shape {
     super.applyText(context);
     context.font = this.styles.font;
     context.textBaseline = 'top';
-    if ('letterSpacing' in context) {
-      context.letterSpacing = this.styles.letterSpacing;
-    }
   }
 
   protected override collectAsyncResources(): void {

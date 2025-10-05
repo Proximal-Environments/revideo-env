@@ -1000,9 +1000,7 @@ export class Layout extends Node {
     this.element.style.fontWeight = this.fontWeight.isInitial()
       ? ''
       : this.fontWeight().toString();
-    this.element.style.letterSpacing = this.letterSpacing.isInitial()
-      ? ''
-      : `${this.letterSpacing()}px`;
+    this.element.style.letterSpacing = '';
 
     this.element.style.textAlign = this.textAlign.isInitial()
       ? ''
