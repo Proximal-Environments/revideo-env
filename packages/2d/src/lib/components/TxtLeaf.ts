@@ -191,8 +191,6 @@ export class TxtLeaf extends Shape {
   'strokeFirst',
   'lineCap',
   'lineJoin',
-  'lineDash',
-  'lineDashOffset',
 ].forEach(prop => {
   (TxtLeaf.prototype as any)[`get${capitalize(prop)}`] = function (
     this: TxtLeaf,

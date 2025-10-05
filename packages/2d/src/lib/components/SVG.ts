@@ -592,12 +592,6 @@ export class SVG extends Shape {
       lineJoin:
         this.parseLineJoin(element.getAttribute('stroke-linejoin')) ??
         inheritedStyle.lineJoin,
-      lineDash:
-        this.parseLineDash(element.getAttribute('stroke-dasharray')) ??
-        inheritedStyle.lineDash,
-      lineDashOffset:
-        this.parseDashOffset(element.getAttribute('stroke-dashoffset')) ??
-        inheritedStyle.lineDashOffset,
       opacity:
         this.parseOpacity(element.getAttribute('opacity')) ??
         inheritedStyle.opacity,
