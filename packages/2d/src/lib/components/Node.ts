@@ -1,4 +1,6 @@
 import type {
+  ColorSignal,
+  PossibleColor,
   PossibleSpacing,
   PossibleVector2,
   Promisable,
@@ -27,6 +29,8 @@ import {
   modify,
   threadable,
   transformAngle,
+  transformScalar,
+  transformVector,
   transformVectorAsPoint,
   unwrap,
   useLogger,
@@ -34,6 +38,7 @@ import {
 import {
   NODE_NAME,
   cloneable,
+  colorSignal,
   computed,
   getPropertiesOf,
   initial,
@@ -84,6 +89,12 @@ export interface NodeProps {
 
   opacity?: SignalValue<number>;
   filters?: SignalValue<Filter[]>;
+
+  shadowColor?: SignalValue<PossibleColor>;
+  shadowBlur?: SignalValue<number>;
+  shadowOffsetX?: SignalValue<number>;
+  shadowOffsetY?: SignalValue<number>;
+  shadowOffset?: SignalValue<PossibleVector2>;
 
   cache?: SignalValue<boolean>;
   /**
@@ -408,6 +419,17 @@ export class Node implements Promisable<Node> {
   @filtersSignal()
   public declare readonly filters: FiltersSignal<this>;
 
+  @initial('#0000')
+  @colorSignal()
+  public declare readonly shadowColor: ColorSignal<this>;
+
+  @initial(0)
+  @signal()
+  public declare readonly shadowBlur: SimpleSignal<number, this>;
+
+  @vector2Signal('shadowOffset')
+  public declare readonly shadowOffset: Vector2Signal<this>;
+
   /**
    * @experimental
    */
@@ -425,7 +447,15 @@ export class Node implements Promisable<Node> {
     return !!this.filters().find(filter => filter.isActive());
   }
 
-  
+  @computed()
+  protected hasShadow() {
+    return (
+      !!this.shadowColor() &&
+      (this.shadowBlur() > 0 ||
+        this.shadowOffset.x() !== 0 ||
+        this.shadowOffset.y() !== 0)
+    );
+  }
 
   @computed()
   protected filterString(): string {
@@ -1311,6 +1341,7 @@ export class Node implements Promisable<Node> {
       this.opacity() < 1 ||
       this.compositeOperation() !== 'source-over' ||
       this.hasFilters() ||
+      this.hasShadow() ||
       this.shaders().length > 0
     );
   }
@@ -1395,7 +1426,28 @@ export class Node implements Promisable<Node> {
    */
   @computed()
   protected fullCacheBBox(): BBox {
-    const result = this.cacheBBox().expand(this.filters.blur() * 2);
+    const matrix = this.compositeToLocal();
+    const shadowOffset = transformVector(this.shadowOffset(), matrix);
+    const shadowBlur = transformScalar(this.shadowBlur(), matrix);
+
+    const result = this.cacheBBox().expand(
+      this.filters.blur() * 2 + shadowBlur,
+    );
+
+    if (shadowOffset.x < 0) {
+      result.x += shadowOffset.x;
+      result.width -= shadowOffset.x;
+    } else {
+      result.width += shadowOffset.x;
+    }
+
+    if (shadowOffset.y < 0) {
+      result.y += shadowOffset.y;
+      result.height -= shadowOffset.y;
+    } else {
+      result.height += shadowOffset.y;
+    }
+
     return result;
   }
 
@@ -1446,6 +1498,16 @@ export class Node implements Promisable<Node> {
     context.globalAlpha *= this.opacity();
     if (this.hasFilters()) {
       context.filter = this.filterString();
+    }
+    if (this.hasShadow()) {
+      const matrix = this.compositeToWorld();
+      const offset = transformVector(this.shadowOffset(), matrix);
+      const blur = transformScalar(this.shadowBlur(), matrix);
+
+      context.shadowColor = this.shadowColor().serialize();
+      context.shadowBlur = blur;
+      context.shadowOffsetX = offset.x;
+      context.shadowOffsetY = offset.y;
     }
 
     const matrix = this.worldToLocal();
