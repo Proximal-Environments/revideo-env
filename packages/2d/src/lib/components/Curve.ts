@@ -266,17 +266,21 @@ export abstract class Curve extends Shape {
     let subpath = new Path2D();
     const profile = this.profile();
 
-    const start = 0;
-    const end = this.baseArcLength();
+    let start = this.percentageToDistance(this.start());
+    let end = this.percentageToDistance(this.end());
+    if (start > end) {
+      [start, end] = [end, start];
+    }
+
     const distance = end - start;
     const arrowSize = Math.min(distance / 2, this.arrowSize());
 
     if (this.startArrow()) {
-      // keep room for arrowhead without trimming by percentage
+      start += arrowSize / 2;
     }
 
     if (this.endArrow()) {
-      // keep room for arrowhead without trimming by percentage
+      end -= arrowSize / 2;
     }
 
     let length = 0;
