@@ -37,7 +37,18 @@ export class LezerHighlighter implements CodeHighlighter<LezerCache | null> {
   public prepare(code: string): LezerCache | null {
     const colorLookup = new Map<string, string>();
     const tree = this.parser.parse(code);
-    
+    highlightTree(tree, this.style, (from, to, classes) => {
+      const color = this.classLookup.get(classes);
+      if (!color) {
+        return;
+      }
+
+      const cursor = tree.cursorAt(from, 1);
+      do {
+        const id = this.getNodeId(cursor.node);
+        colorLookup.set(id, color);
+      } while (cursor.next() && cursor.to <= to);
+    });
 
     return {
       tree,
