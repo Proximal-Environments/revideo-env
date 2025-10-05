@@ -76,6 +76,8 @@ export abstract class Shape extends Layout {
     context.lineWidth = this.lineWidth();
     context.lineJoin = this.lineJoin();
     context.lineCap = this.lineCap();
+    context.setLineDash(this.lineDash());
+    context.lineDashOffset = this.lineDashOffset();
     if (!this.antialiased()) {
       // from https://stackoverflow.com/a/68372384
       context.filter =

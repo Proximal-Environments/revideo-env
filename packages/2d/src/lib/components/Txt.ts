@@ -191,6 +191,8 @@ export class Txt extends Shape {
   'strokeFirst',
   'lineCap',
   'lineJoin',
+  'lineDash',
+  'lineDashOffset',
 ].forEach(prop => {
   (Txt.prototype as any)[`getDefault${capitalize(prop)}`] = function (
     this: Txt,
