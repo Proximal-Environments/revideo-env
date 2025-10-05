@@ -250,6 +250,10 @@ about working with images.`,
       context.restore();
     }
 
+    if (this.clip()) {
+      context.clip(this.getPath());
+    }
+
     await this.drawChildren(context);
   }
 

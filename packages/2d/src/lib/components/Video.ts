@@ -299,6 +299,10 @@ export class Video extends Media {
       context.restore();
     }
 
+    if (this.clip()) {
+      context.clip(this.getPath());
+    }
+
     await this.drawChildren(context);
   }
 

@@ -121,6 +121,9 @@ export class Rive extends Rect {
     await renderPromise;
 
     context.drawImage(canvas, box.x, box.y, box.width, box.height);
+    if (this.clip()) {
+      context.clip(this.getPath());
+    }
 
     await this.drawChildren(context);
   }
