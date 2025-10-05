@@ -44,9 +44,110 @@ export function drawRoundRect(
   smoothCorners: boolean,
   cornerSharpness: number,
 ) {
-  drawRect(context, rect);
+  if (
+    radius.top === 0 &&
+    radius.right === 0 &&
+    radius.bottom === 0 &&
+    radius.left === 0
+  ) {
+    drawRect(context, rect);
+    return;
+  }
+
+  const topLeft = adjustRectRadius(radius.top, radius.right, radius.left, rect);
+  const topRight = adjustRectRadius(
+    radius.right,
+    radius.top,
+    radius.bottom,
+    rect,
+  );
+  const bottomRight = adjustRectRadius(
+    radius.bottom,
+    radius.left,
+    radius.right,
+    rect,
+  );
+  const bottomLeft = adjustRectRadius(
+    radius.left,
+    radius.bottom,
+    radius.top,
+    rect,
+  );
+
+  if (smoothCorners) {
+    const sharpness = (radius: number): number => {
+      const val = radius * cornerSharpness;
+      return radius - val;
+    };
+
+    context.moveTo(rect.left + topLeft, rect.top);
+    context.lineTo(rect.right - topRight, rect.top);
+
+    context.bezierCurveTo(
+      rect.right - sharpness(topRight),
+      rect.top,
+      rect.right,
+      rect.top + sharpness(topRight),
+      rect.right,
+      rect.top + topRight,
+    );
+    context.lineTo(rect.right, rect.bottom - bottomRight);
+
+    context.bezierCurveTo(
+      rect.right,
+      rect.bottom - sharpness(bottomRight),
+      rect.right - sharpness(bottomRight),
+      rect.bottom,
+      rect.right - bottomRight,
+      rect.bottom,
+    );
+    context.lineTo(rect.left + bottomLeft, rect.bottom);
+
+    context.bezierCurveTo(
+      rect.left + sharpness(bottomLeft),
+      rect.bottom,
+      rect.left,
+      rect.bottom - sharpness(bottomLeft),
+      rect.left,
+      rect.bottom - bottomLeft,
+    );
+    context.lineTo(rect.left, rect.top + topLeft);
+
+    context.bezierCurveTo(
+      rect.left,
+      rect.top + sharpness(topLeft),
+      rect.left + sharpness(topLeft),
+      rect.top,
+      rect.left + topLeft,
+      rect.top,
+    );
+    return;
+  }
+
+  context.moveTo(rect.left + topLeft, rect.top);
+  context.arcTo(rect.right, rect.top, rect.right, rect.bottom, topRight);
+  context.arcTo(rect.right, rect.bottom, rect.left, rect.bottom, bottomRight);
+  context.arcTo(rect.left, rect.bottom, rect.left, rect.top, bottomLeft);
+  context.arcTo(rect.left, rect.top, rect.right, rect.top, topLeft);
 }
 
+export function adjustRectRadius(
+  radius: number,
+  horizontal: number,
+  vertical: number,
+  rect: BBox,
+): number {
+  const width =
+    radius + horizontal > rect.width
+      ? rect.width * (radius / (radius + horizontal))
+      : radius;
+  const height =
+    radius + vertical > rect.height
+      ? rect.height * (radius / (radius + vertical))
+      : radius;
+
+  return Math.min(width, height);
+}
 
 export function drawRect(
   context: CanvasRenderingContext2D | Path2D,
