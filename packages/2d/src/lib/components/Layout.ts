@@ -1007,7 +1007,29 @@ export class Layout extends Node {
     this.element.style.textAlign = this.textAlign.isInitial()
       ? ''
       : this.textAlign();
-    this.element.style.whiteSpace = 'nowrap';
+
+    if (this.textWrap.isInitial()) {
+      this.element.style.whiteSpace = '';
+      return;
+    }
+
+    const wrap = this.textWrap();
+
+    if (typeof wrap === 'boolean') {
+      this.element.style.whiteSpace = wrap ? 'normal' : 'nowrap';
+      return;
+    }
+
+    if (wrap === 'pre') {
+      this.element.style.whiteSpace = wrap;
+      return;
+    }
+
+    if (wrap === 'balance') {
+      this.element.style.whiteSpace = 'normal';
+      this.element.style.textWrap = wrap;
+      return;
+    }
   }
 
   public override dispose() {

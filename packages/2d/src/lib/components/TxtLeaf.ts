@@ -141,12 +141,37 @@ export class TxtLeaf extends Shape {
   protected override updateLayout() {
     this.applyFont();
     this.applyFlex();
+
+    // Make sure the text is aligned correctly even if the text is smaller than
+    // the container.
     if (this.justifyContent.isInitial()) {
       this.element.style.justifyContent =
         this.styles.getPropertyValue('text-align');
     }
 
-    this.element.innerText = this.text();
+    const wrap =
+      this.styles.whiteSpace !== 'nowrap' && this.styles.whiteSpace !== 'pre';
+
+    if (wrap) {
+      this.element.innerText = '';
+
+      if (TxtLeaf.segmenter) {
+        for (const word of TxtLeaf.segmenter.segment(this.text())) {
+          this.element.appendChild(document.createTextNode(word.segment));
+        }
+      } else {
+        for (const word of this.text().split('')) {
+          this.element.appendChild(document.createTextNode(word));
+        }
+      }
+    } else if (this.styles.whiteSpace === 'pre') {
+      this.element.innerText = '';
+      for (const line of this.text().split('\n')) {
+        this.element.appendChild(document.createTextNode(line + '\n'));
+      }
+    } else {
+      this.element.innerText = this.text();
+    }
   }
 }
 
