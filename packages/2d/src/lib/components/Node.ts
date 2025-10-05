@@ -518,9 +518,7 @@ export class Node implements Promisable<Node> {
 
   @computed()
   protected sortedChildren(): Node[] {
-    return [...this.children()].sort((a, b) =>
-      Math.sign(a.zIndex() - b.zIndex()),
-    );
+    return this.children();
   }
 
   protected view2D: View2D;
@@ -769,40 +767,6 @@ export class Node implements Promisable<Node> {
    * @param by - Number of places by which the node should be moved.
    */
   public move(by = 1): this {
-    const parent = this.parent();
-    if (by === 0 || !parent) {
-      return this;
-    }
-
-    const children = parent.children();
-    const newChildren: Node[] = [];
-
-    if (by > 0) {
-      for (let i = 0; i < children.length; i++) {
-        const child = children[i];
-        if (child === this) {
-          const target = i + by;
-          for (; i < target && i + 1 < children.length; i++) {
-            newChildren[i] = children[i + 1];
-          }
-        }
-        newChildren[i] = child;
-      }
-    } else {
-      for (let i = children.length - 1; i >= 0; i--) {
-        const child = children[i];
-        if (child === this) {
-          const target = i + by;
-          for (; i > target && i > 0; i--) {
-            newChildren[i] = children[i - 1];
-          }
-        }
-        newChildren[i] = child;
-      }
-    }
-
-    parent.setParsedChildren(newChildren);
-
     return this;
   }
 
@@ -814,7 +778,7 @@ export class Node implements Promisable<Node> {
    * from then on will be rendered on top of it.
    */
   public moveUp(): this {
-    return this.move(1);
+    return this;
   }
 
   /**
@@ -825,7 +789,7 @@ export class Node implements Promisable<Node> {
    * from then on will be rendered under it.
    */
   public moveDown(): this {
-    return this.move(-1);
+    return this;
   }
 
   /**
@@ -836,7 +800,7 @@ export class Node implements Promisable<Node> {
    * will be rendered on top of all of its siblings.
    */
   public moveToTop(): this {
-    return this.move(Infinity);
+    return this;
   }
 
   /**
@@ -847,7 +811,7 @@ export class Node implements Promisable<Node> {
    * on will be rendered below all of its siblings.
    */
   public moveToBottom(): this {
-    return this.move(-Infinity);
+    return this;
   }
 
   /**
@@ -862,15 +826,7 @@ export class Node implements Promisable<Node> {
    * @param index - The index to move the node to.
    */
   public moveTo(index: number): this {
-    const parent = this.parent();
-    if (!parent) {
-      return this;
-    }
-
-    const currentIndex = parent.children().indexOf(this);
-    const by = index - currentIndex;
-
-    return this.move(by);
+    return this;
   }
 
   /**
@@ -887,33 +843,7 @@ export class Node implements Promisable<Node> {
    *                        it is already positioned below the sibling.
    */
   public moveBelow(node: Node, directlyBelow = false): this {
-    const parent = this.parent();
-    if (!parent) {
-      return this;
-    }
-
-    if (node.parent() !== parent) {
-      useLogger().error(
-        "Cannot position nodes relative to each other if they don't belong to the same parent.",
-      );
-      return this;
-    }
-
-    const children = parent.children();
-    const ownIndex = children.indexOf(this);
-    const otherIndex = children.indexOf(node);
-
-    if (!directlyBelow && ownIndex < otherIndex) {
-      // Nothing to do if the node is already positioned below the target node.
-      // We could move the node so it's directly below the sibling node, but
-      // that might suddenly move it on top of other nodes. This is likely
-      // not what the user wanted to happen when calling this method.
-      return this;
-    }
-
-    const by = otherIndex - ownIndex - 1;
-
-    return this.move(by);
+    return this;
   }
 
   /**
@@ -930,33 +860,7 @@ export class Node implements Promisable<Node> {
    *                        already positioned above the sibling.
    */
   public moveAbove(node: Node, directlyAbove = false): this {
-    const parent = this.parent();
-    if (!parent) {
-      return this;
-    }
-
-    if (node.parent() !== parent) {
-      useLogger().error(
-        "Cannot position nodes relative to each other if they don't belong to the same parent.",
-      );
-      return this;
-    }
-
-    const children = parent.children();
-    const ownIndex = children.indexOf(this);
-    const otherIndex = children.indexOf(node);
-
-    if (!directlyAbove && ownIndex > otherIndex) {
-      // Nothing to do if the node is already positioned above the target node.
-      // We could move the node so it's directly above the sibling node, but
-      // that might suddenly move it below other nodes. This is likely not what
-      // the user wanted to happen when calling this method.
-      return this;
-    }
-
-    const by = otherIndex - ownIndex + 1;
-
-    return this.move(by);
+    return this;
   }
 
   /**
