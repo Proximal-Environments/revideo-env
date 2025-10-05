@@ -11,6 +11,10 @@ import {Media} from './Media';
 
 export interface VideoProps extends MediaProps {
   /**
+   * {@inheritDoc Video.alpha}
+   */
+  alpha?: SignalValue<number>;
+  /**
    * {@inheritDoc Video.smoothing}
    */
   smoothing?: SignalValue<boolean>;
@@ -22,6 +26,17 @@ export interface VideoProps extends MediaProps {
 
 @nodeName('Video')
 export class Video extends Media {
+  /**
+   * The alpha value of this video.
+   *
+   * @remarks
+   * Unlike opacity, the alpha value affects only the video itself, leaving the
+   * fill, stroke, and children intact.
+   */
+  @initial(1)
+  @signal()
+  public declare readonly alpha: SimpleSignal<number, this>;
+
   /**
    * Whether the video should be smoothed.
    *
@@ -269,14 +284,20 @@ export class Video extends Media {
 
   protected override async draw(context: CanvasRenderingContext2D) {
     this.drawShape(context);
-    const video = await this.seekFunction();
+    const alpha = this.alpha();
+    if (alpha > 0) {
+      const video = await this.seekFunction();
 
-    const box = BBox.fromSizeCentered(this.computedSize());
-    context.save();
-    context.clip(this.getPath());
-    context.imageSmoothingEnabled = this.smoothing();
-    drawImage(context, video, box);
-    context.restore();
+      const box = BBox.fromSizeCentered(this.computedSize());
+      context.save();
+      context.clip(this.getPath());
+      if (alpha < 1) {
+        context.globalAlpha *= alpha;
+      }
+      context.imageSmoothingEnabled = this.smoothing();
+      drawImage(context, video, box);
+      context.restore();
+    }
 
     if (this.clip()) {
       context.clip(this.getPath());

@@ -44,6 +44,10 @@ export interface ImgProps extends RectProps {
    */
   src?: SignalValue<string | null>;
   /**
+   * {@inheritDoc Img.alpha}
+   */
+  alpha?: SignalValue<number>;
+  /**
    * {@inheritDoc Img.smoothing}
    */
   smoothing?: SignalValue<boolean>;
@@ -115,6 +119,17 @@ export class Img extends Rect {
    */
   @signal()
   public declare readonly src: SimpleSignal<string, this>;
+
+  /**
+   * The alpha value of this image.
+   *
+   * @remarks
+   * Unlike opacity, the alpha value affects only the image itself, leaving the
+   * fill, stroke, and children intact.
+   */
+  @initial(1)
+  @signal()
+  public declare readonly alpha: SimpleSignal<number, this>;
 
   /**
    * Whether the image should be smoothed.
@@ -222,12 +237,18 @@ about working with images.`,
 
   protected override async draw(context: CanvasRenderingContext2D) {
     this.drawShape(context);
-    const box = BBox.fromSizeCentered(this.computedSize());
-    context.save();
-    context.clip(this.getPath());
-    context.imageSmoothingEnabled = this.smoothing();
-    drawImage(context, this.image(), box);
-    context.restore();
+    const alpha = this.alpha();
+    if (alpha > 0) {
+      const box = BBox.fromSizeCentered(this.computedSize());
+      context.save();
+      context.clip(this.getPath());
+      if (alpha < 1) {
+        context.globalAlpha *= alpha;
+      }
+      context.imageSmoothingEnabled = this.smoothing();
+      drawImage(context, this.image(), box);
+      context.restore();
+    }
 
     if (this.clip()) {
       context.clip(this.getPath());
