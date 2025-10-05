@@ -1,5 +1,6 @@
 import type {Color, PossibleColor} from '@revideo/core';
 import type {Gradient} from './Gradient';
+import type {Pattern} from './Pattern';
 
 export type FlexDirection = 'row' | 'row-reverse' | 'column' | 'column-reverse';
 
@@ -53,5 +54,5 @@ export type DesiredLength = Length | null;
  */
 export type LengthLimit = Length | null | 'max-content' | 'min-content';
 
-export type PossibleCanvasStyle = null | PossibleColor | Gradient;
-export type CanvasStyle = null | Color | Gradient;
+export type PossibleCanvasStyle = null | PossibleColor | Gradient | Pattern;
+export type CanvasStyle = null | Color | Gradient | Pattern;
