@@ -289,14 +289,11 @@ export class Video extends Media {
       const video = await this.seekFunction();
 
       const box = BBox.fromSizeCentered(this.computedSize());
-      context.save();
-      context.clip(this.getPath());
       if (alpha < 1) {
         context.globalAlpha *= alpha;
       }
       context.imageSmoothingEnabled = this.smoothing();
       drawImage(context, video, box);
-      context.restore();
     }
 
     if (this.clip()) {
