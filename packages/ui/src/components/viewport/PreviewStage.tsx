@@ -27,7 +27,7 @@ export function PreviewStage(props: JSX.HTMLAttributes<HTMLDivElement>) {
   );
 
   useEffect(() => {
-    stage.configure({resolutionScale, size, background});
+    stage.configure({size, background});
     player.requestRender();
   }, [resolutionScale, size, background, player]);
 

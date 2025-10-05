@@ -193,7 +193,11 @@ export class Renderer {
 
     try {
       const frame = this.status.secondsToFrames(time);
-      this.stage.configure(settings);
+      this.stage.configure({
+        size: settings.size,
+        colorSpace: settings.colorSpace,
+        background: settings.background,
+      });
       this.playback.fps = settings.fps;
       this.playback.state = PlaybackState.Rendering;
 
@@ -251,7 +255,11 @@ export class Renderer {
         ...((await this.exporter.configuration()) ?? {}),
       };
     }
-    this.stage.configure(settings);
+    this.stage.configure({
+      size: settings.size,
+      colorSpace: settings.colorSpace,
+      background: settings.background,
+    });
     this.playback.fps = settings.fps;
     this.playback.state = PlaybackState.Rendering;
     const from = this.status.secondsToFrames(settings.range[0]);
@@ -355,7 +363,7 @@ export class Renderer {
       const scene = this.playback.onScenesRecalculated.current[i];
       scene.reload({
         size: settings.size,
-        resolutionScale: settings.resolutionScale,
+        resolutionScale: 1,
       });
       scene.variables.updateSignals(this.project.variables ?? {});
     }
@@ -381,7 +389,11 @@ export class Renderer {
   }
 
   private async getMediaByFrames(settings: RendererSettings) {
-    this.stage.configure(settings);
+    this.stage.configure({
+      size: settings.size,
+      colorSpace: settings.colorSpace,
+      background: settings.background,
+    });
     this.playback.fps = settings.fps;
     this.playback.state = PlaybackState.Rendering;
     const from = this.status.secondsToFrames(settings.range[0]);
