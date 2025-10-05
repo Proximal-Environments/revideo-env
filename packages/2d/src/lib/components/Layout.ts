@@ -978,7 +978,32 @@ export class Layout extends Node {
         })(),
       );
     }
-    
+
+    this.element.style.fontFamily = this.fontFamily.isInitial()
+      ? ''
+      : this.fontFamily();
+    this.element.style.fontSize = this.fontSize.isInitial()
+      ? ''
+      : `${this.fontSize()}px`;
+    this.element.style.fontStyle = this.fontStyle.isInitial()
+      ? ''
+      : this.fontStyle();
+    if (this.lineHeight.isInitial()) {
+      this.element.style.lineHeight = '';
+    } else {
+      const lineHeight = this.lineHeight();
+      this.element.style.lineHeight =
+        typeof lineHeight === 'string'
+          ? (parseFloat(lineHeight as string) / 100).toString()
+          : `${lineHeight}px`;
+    }
+    this.element.style.fontWeight = this.fontWeight.isInitial()
+      ? ''
+      : this.fontWeight().toString();
+    this.element.style.letterSpacing = this.letterSpacing.isInitial()
+      ? ''
+      : `${this.letterSpacing()}px`;
+
     this.element.style.textAlign = this.textAlign.isInitial()
       ? ''
       : this.textAlign();
