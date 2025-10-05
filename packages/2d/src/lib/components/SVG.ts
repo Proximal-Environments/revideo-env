@@ -447,19 +447,9 @@ export class SVG extends Shape {
       size = viewBox.size;
     }
 
-    const scale = size.div(viewBox.size);
-    const center = viewBox.center;
-
-    const rootTransform = new DOMMatrix()
-      .scaleSelf(scale.x, scale.y)
-      .translateSelf(-center.x, -center.y);
-
-    const nodes = Array.from(
-      SVG.extractGroupNodes(svgRoot, svgRoot, rootTransform, {}),
-    );
     const builder: SVGDocumentData = {
       size,
-      nodes,
+      nodes: [],
     };
     SVG.svgNodesPool[svg] = builder;
     return builder;
