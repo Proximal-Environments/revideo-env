@@ -23,16 +23,13 @@ import {
   Vector2,
   all,
   clamp,
-  createSignal,
   easeInOutCubic,
   isReactive,
   modify,
-  threadable,
   transformAngle,
   transformScalar,
   transformVector,
   transformVectorAsPoint,
-  unwrap,
   useLogger,
 } from '@revideo/core';
 import {
@@ -119,7 +116,6 @@ export interface NodeProps {
   cachePadding?: SignalValue<PossibleSpacing>;
 
   composite?: SignalValue<boolean>;
-  compositeOperation?: SignalValue<GlobalCompositeOperation>;
   /**
    * @experimental
    */
@@ -373,32 +369,6 @@ export class Node implements Promisable<Node> {
   @signal()
   public declare readonly composite: SimpleSignal<boolean, this>;
 
-  @initial('source-over')
-  @signal()
-  public declare readonly compositeOperation: SimpleSignal<
-    GlobalCompositeOperation,
-    this
-  >;
-
-  private readonly compositeOverride = createSignal(0);
-
-  @threadable()
-  protected *tweenCompositeOperation(
-    value: SignalValue<GlobalCompositeOperation>,
-    time: number,
-    timingFunction: TimingFunction,
-  ) {
-    const nextValue = unwrap(value);
-    if (nextValue === 'source-over') {
-      yield* this.compositeOverride(1, time, timingFunction);
-      this.compositeOverride(0);
-      this.compositeOperation(nextValue);
-    } else {
-      this.compositeOperation(nextValue);
-      this.compositeOverride(1);
-      yield* this.compositeOverride(0, time, timingFunction);
-    }
-  }
 
   /**
    * Represents the opacity of this node in the range 0-1.
@@ -1339,7 +1309,6 @@ export class Node implements Promisable<Node> {
     return (
       this.cache() ||
       this.opacity() < 1 ||
-      this.compositeOperation() !== 'source-over' ||
       this.hasFilters() ||
       this.hasShadow() ||
       this.shaders().length > 0
@@ -1494,7 +1463,6 @@ export class Node implements Promisable<Node> {
    * @param context - The context using which the cache will be drawn.
    */
   protected setupDrawFromCache(context: CanvasRenderingContext2D) {
-    context.globalCompositeOperation = this.compositeOperation();
     context.globalAlpha *= this.opacity();
     if (this.hasFilters()) {
       context.filter = this.filterString();
@@ -1528,16 +1496,7 @@ export class Node implements Promisable<Node> {
     y: number,
   ) {
     this.setupDrawFromCache(context);
-
-    const compositeOverride = this.compositeOverride();
     context.drawImage(source, x, y);
-    if (compositeOverride > 0) {
-      context.save();
-      context.globalAlpha *= compositeOverride;
-      context.globalCompositeOperation = 'source-over';
-      context.drawImage(source, x, y);
-      context.restore();
-    }
   }
 
   private shaderCanvas(destination: TexImageSource, source: TexImageSource) {
