@@ -950,12 +950,12 @@ export class Layout extends Node {
     this.element.style.flexBasis = this.parseLength(this.basis()!);
     this.element.style.flexWrap = this.wrap();
 
-    this.element.style.justifyContent = this.justifyContent();
-    this.element.style.alignContent = this.alignContent();
-    this.element.style.alignItems = this.alignItems();
-    this.element.style.alignSelf = this.alignSelf();
-    this.element.style.columnGap = this.parseLength(this.gap.x());
-    this.element.style.rowGap = this.parseLength(this.gap.y());
+    this.element.style.justifyContent = '';
+    this.element.style.alignContent = '';
+    this.element.style.alignItems = '';
+    this.element.style.alignSelf = '';
+    this.element.style.columnGap = '';
+    this.element.style.rowGap = '';
 
     if (this.sizeLockCounter() > 0) {
       this.element.style.flexGrow = '0';
