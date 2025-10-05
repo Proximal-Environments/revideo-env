@@ -690,7 +690,14 @@ export class Layout extends Node {
   }
 
   public override localToParent(): DOMMatrix {
-    return super.localToParent();
+    const matrix = super.localToParent();
+    const offset = this.offset();
+    if (!offset.exactlyEquals(Vector2.zero)) {
+      const translate = this.size().mul(offset).scale(-0.5);
+      matrix.translateSelf(translate.x, translate.y);
+    }
+
+    return matrix;
   }
 
   /**
@@ -702,8 +709,16 @@ export class Layout extends Node {
   @computed()
   protected scalingRotationMatrix(): DOMMatrix {
     const matrix = new DOMMatrix();
+
     matrix.rotateSelf(0, 0, this.rotation());
     matrix.scaleSelf(this.scale.x(), this.scale.y());
+
+    const offset = this.offset();
+    if (!offset.exactlyEquals(Vector2.zero)) {
+      const translate = this.size().mul(offset).scale(-0.5);
+      matrix.translateSelf(translate.x, translate.y);
+    }
+
     return matrix;
   }
 
@@ -716,7 +731,10 @@ export class Layout extends Node {
     this.requestLayoutUpdate();
     const box = this.getComputedLayout();
 
-    const position = new Vector2(box.x + box.width / 2, box.y + box.height / 2);
+    const position = new Vector2(
+      box.x + (box.width / 2) * this.offset.x(),
+      box.y + (box.height / 2) * this.offset.y(),
+    );
 
     const parent = this.parentTransform();
     if (parent) {
