@@ -1,5 +1,10 @@
 import type {Project, RenderVideoUserProjectSettings} from '@revideo/core';
-import {Renderer, Vector2, getFullRenderingSettings} from '@revideo/core';
+import {
+  Color,
+  Renderer,
+  Vector2,
+  getFullRenderingSettings,
+} from '@revideo/core';
 
 declare global {
   interface Window {
@@ -39,6 +44,11 @@ export const render = async (
     const renderSettingsFromProject = getFullRenderingSettings(project);
 
     // Overwrite settings with user provided settings
+    let background = renderSettingsFromProject.background;
+    if (overwriteRenderSettings.background) {
+      background = new Color(overwriteRenderSettings.background);
+    }
+
     let size = renderSettingsFromProject.size;
     if (overwriteRenderSettings.size) {
       size = new Vector2(
@@ -53,6 +63,7 @@ export const render = async (
       name: project.name,
       hiddenFolderId: hiddenFolderId,
       ...overwriteRenderSettings,
+      background,
       size,
       range: [
         renderer.frameToTime(firstWorkerFrame),
