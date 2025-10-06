@@ -181,7 +181,11 @@ export abstract class Curve extends Shape {
    * @param value - The percentage along the curve.
    */
   public percentageToDistance(value: number): number {
-    return clamp(0, this.baseArcLength(), this.baseArcLength() * value);
+    return clamp(
+      0,
+      this.baseArcLength(),
+      this.startOffset() + this.offsetArcLength() * value,
+    );
   }
 
   /**
@@ -194,8 +198,7 @@ export abstract class Curve extends Shape {
    * @param value - The distance along the curve.
    */
   public distanceToPercentage(value: number): number {
-    const baseLength = this.baseArcLength();
-    return baseLength === 0 ? 0 : value / baseLength;
+    return (value - this.startOffset()) / this.offsetArcLength();
   }
 
   /**
@@ -217,7 +220,10 @@ export abstract class Curve extends Shape {
    * {@link startOffset | the offsets}.
    */
   public offsetArcLength() {
-    return this.baseArcLength();
+    const startOffset = this.startOffset();
+    const endOffset = this.endOffset();
+    const baseLength = this.baseArcLength();
+    return clamp(0, baseLength, baseLength - startOffset - endOffset);
   }
 
   /**
@@ -229,7 +235,7 @@ export abstract class Curve extends Shape {
    */
   @computed()
   public arcLength() {
-    return this.baseArcLength();
+    return this.offsetArcLength() * Math.abs(this.start() - this.end());
   }
 
   /**
@@ -260,8 +266,8 @@ export abstract class Curve extends Shape {
     let subpath = new Path2D();
     const profile = this.profile();
 
-    let start = 0;
-    let end = this.baseArcLength();
+    let start = this.percentageToDistance(this.start());
+    let end = this.percentageToDistance(this.end());
     if (start > end) {
       [start, end] = [end, start];
     }
@@ -349,7 +355,7 @@ export abstract class Curve extends Shape {
   }
 
   protected getPointAtDistance(value: number): CurvePoint {
-    return getPointAtDistance(this.profile(), value);
+    return getPointAtDistance(this.profile(), value + this.startOffset());
   }
 
   public getPointAtPercentage(value: number): CurvePoint {
@@ -393,7 +399,14 @@ export abstract class Curve extends Shape {
    * using the 2D context.
    */
   protected requiresProfile(): boolean {
-    return !this.startArrow.isInitial() || !this.endArrow.isInitial();
+    return (
+      !this.start.isInitial() ||
+      !this.startOffset.isInitial() ||
+      !this.startArrow.isInitial() ||
+      !this.end.isInitial() ||
+      !this.endOffset.isInitial() ||
+      !this.endArrow.isInitial()
+    );
   }
 
   protected override drawShape(context: CanvasRenderingContext2D) {
