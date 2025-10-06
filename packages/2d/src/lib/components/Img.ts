@@ -1,17 +1,5 @@
-import type {
-  PossibleVector2,
-  SerializedVector2,
-  SignalValue,
-  SimpleSignal,
-} from '@revideo/core';
-import {
-  BBox,
-  Color,
-  DependencyContext,
-  DetailedError,
-  Vector2,
-  useLogger,
-} from '@revideo/core';
+import type {SerializedVector2, SignalValue, SimpleSignal} from '@revideo/core';
+import {BBox, DependencyContext, DetailedError, useLogger} from '@revideo/core';
 import {computed, initial, nodeName, signal} from '../decorators';
 import type {DesiredLength} from '../partials';
 import {drawImage} from '../utils';
@@ -211,30 +199,6 @@ about working with images.`,
     return image;
   }
 
-  @computed()
-  protected imageCanvas(): CanvasRenderingContext2D {
-    const canvas = document
-      .createElement('canvas')
-      .getContext('2d', {willReadFrequently: true});
-    if (!canvas) {
-      throw new Error('Could not create an image canvas');
-    }
-
-    return canvas;
-  }
-
-  @computed()
-  protected filledImageCanvas() {
-    const context = this.imageCanvas();
-    const image = this.image();
-    context.canvas.width = image.naturalWidth;
-    context.canvas.height = image.naturalHeight;
-    context.imageSmoothingEnabled = this.smoothing();
-    context.drawImage(image, 0, 0);
-
-    return context;
-  }
-
   protected override async draw(context: CanvasRenderingContext2D) {
     this.drawShape(context);
     const alpha = this.alpha();
@@ -263,53 +227,6 @@ about working with images.`,
     this.element.style.aspectRatio = (
       this.ratio() ?? image.naturalWidth / image.naturalHeight
     ).toString();
-  }
-
-  /**
-   * Get color of the image at the given position.
-   *
-   * @param position - The position in local space at which to sample the color.
-   */
-  public getColorAtPoint(position: PossibleVector2): Color {
-    const size = this.computedSize();
-    const naturalSize = this.naturalSize();
-
-    const pixelPosition = new Vector2(position)
-      .add(this.computedSize().scale(0.5))
-      .mul(naturalSize.div(size).safe);
-
-    return this.getPixelColor(pixelPosition);
-  }
-
-  /**
-   * The natural size of this image.
-   *
-   * @remarks
-   * The natural size is the size of the source image unaffected by the size
-   * and scale properties.
-   */
-  @computed()
-  public naturalSize() {
-    const image = this.image();
-    return new Vector2(image.naturalWidth, image.naturalHeight);
-  }
-
-  /**
-   * Get color of the image at the given pixel.
-   *
-   * @param position - The pixel's position.
-   */
-  public getPixelColor(position: PossibleVector2): Color {
-    const context = this.filledImageCanvas();
-    const vector = new Vector2(position);
-    const data = context.getImageData(vector.x, vector.y, 1, 1).data;
-
-    return new Color({
-      r: data[0],
-      g: data[1],
-      b: data[2],
-      a: data[3] / 255,
-    });
   }
 
   protected override collectAsyncResources() {
