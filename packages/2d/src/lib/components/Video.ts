@@ -144,7 +144,7 @@ export class Video extends Media {
     const video = this.video();
     const time = this.clampTime(this.time());
 
-    video.playbackRate = 1;
+    video.playbackRate = this.playbackRate();
 
     if (!video.paused) {
       video.pause();
@@ -164,7 +164,7 @@ export class Video extends Media {
     const video = this.video();
     const time = this.clampTime(this.time());
 
-    video.playbackRate = 1;
+    video.playbackRate = this.playbackRate();
 
     if (this.lastTime === time) {
       return video;
@@ -198,13 +198,13 @@ export class Video extends Media {
     const video = this.video();
     const time = this.clampTime(this.time());
 
-    video.playbackRate = 1;
+    video.playbackRate = this.playbackRate();
 
     if (this.lastFrame && this.lastTime === time) {
       return this.lastFrame;
     }
 
-    const fps = this.view().fps();
+    const fps = this.view().fps() / this.playbackRate();
     return getFrame(this.key, video.src, time, fps);
   }
 
@@ -213,13 +213,13 @@ export class Video extends Media {
     const time = this.clampTime(this.time());
     const duration = this.getDuration();
 
-    video.playbackRate = 1;
+    video.playbackRate = this.playbackRate();
 
     if (this.lastFrame && this.lastTime === time) {
       return this.lastFrame;
     }
 
-    const fps = this.view().fps();
+    const fps = this.view().fps() / this.playbackRate();
 
     if (!Video.imageCommunication) {
       throw new Error('ServerSeekedVideo can only be used with HMR.');

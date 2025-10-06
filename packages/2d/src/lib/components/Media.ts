@@ -228,6 +228,17 @@ export abstract class Media extends Rect {
       value = playbackRate;
     }
     this.playbackRate.context.setter(value);
+
+    if (this.playing()) {
+      if (value === 0) {
+        this.pause();
+      } else {
+        const time = useThread().time;
+        const start = time();
+        const offset = this.time();
+        this.time(() => this.clampTime(offset + (time() - start) * value));
+      }
+    }
   }
 
   protected scheduleSeek(time: number) {
@@ -285,8 +296,9 @@ export abstract class Media extends Rect {
     const time = useThread().time;
     const start = time();
     const offset = this.time();
+    const playbackRate = this.playbackRate();
     this.playing(true);
-    this.time(() => this.clampTime(offset + (time() - start)));
+    this.time(() => this.clampTime(offset + (time() - start) * playbackRate));
   }
 
   public pause() {
