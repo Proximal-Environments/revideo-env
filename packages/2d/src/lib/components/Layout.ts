@@ -709,6 +709,8 @@ export class Layout extends Node {
   @computed()
   protected scalingRotationMatrix(): DOMMatrix {
     const matrix = new DOMMatrix();
+
+    matrix.rotateSelf(0, 0, this.rotation());
     matrix.scaleSelf(this.scale.x(), this.scale.y());
 
     const offset = this.offset();

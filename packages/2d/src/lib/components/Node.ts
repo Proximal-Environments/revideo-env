@@ -616,6 +616,7 @@ export class Node implements Promisable<Node> {
   public localToParent(): DOMMatrix {
     const matrix = new DOMMatrix();
     matrix.translateSelf(this.x(), this.y());
+    matrix.rotateSelf(0, 0, this.rotation());
     matrix.scaleSelf(this.scale.x(), this.scale.y());
     matrix.skewXSelf(this.skew.x());
     matrix.skewYSelf(this.skew.y());
