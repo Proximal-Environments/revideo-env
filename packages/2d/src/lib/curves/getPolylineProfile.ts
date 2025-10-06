@@ -1,12 +1,11 @@
 import type {Vector2} from '@revideo/core';
 import {clamp} from '@revideo/core';
-import {CircleSegment} from './CircleSegment';
 import type {CurveProfile} from './CurveProfile';
 import {LineSegment} from './LineSegment';
 
 export function getPolylineProfile(
   points: readonly Vector2[],
-  radius: number,
+  _radius: number,
   closed: boolean,
 ): CurveProfile {
   const profile: CurveProfile = {
@@ -19,70 +18,44 @@ export function getPolylineProfile(
     return profile;
   }
 
-  if (closed) {
-    const middle = points[0].add(points[points.length - 1]).scale(0.5);
-    points = [middle, ...points, middle];
-  }
-
   let last = points[0];
-  for (let i = 2; i < points.length; i++) {
-    const start = points[i - 2];
-    const center = points[i - 1];
-    const end = points[i];
-
-    const centerToStart = start.sub(center);
-    const centerToEnd = end.sub(center);
-    const startVector = centerToStart.normalized.safe;
-    const endVector = centerToEnd.normalized.safe;
-    const angleBetween = Math.acos(clamp(-1, 1, startVector.dot(endVector)));
-    const angleTan = Math.tan(angleBetween / 2);
-    const angleSin = Math.sin(angleBetween / 2);
-
-    const safeRadius = Math.min(
-      radius,
-      angleTan * centerToStart.magnitude * (i === 2 ? 1 : 0.5),
-      angleTan * centerToEnd.magnitude * (i === points.length - 1 ? 1 : 0.5),
-    );
-
-    const circleOffsetDistance = angleSin === 0 ? 0 : safeRadius / angleSin;
-    const pointOffsetDistance = angleTan === 0 ? 0 : safeRadius / angleTan;
-    const circleDistance = startVector
-      .add(endVector)
-      .scale(1 / 2)
-      .normalized.safe.scale(circleOffsetDistance)
-      .add(center);
-
-    const counter = startVector.perpendicular.dot(endVector) < 0;
-    const line = new LineSegment(
-      last,
-      center.add(startVector.scale(pointOffsetDistance)),
-    );
-    const circle = new CircleSegment(
-      circleDistance,
-      safeRadius,
-      startVector.perpendicular.scale(counter ? 1 : -1),
-      endVector.perpendicular.scale(counter ? -1 : 1),
-      counter,
-    );
-
+  for (let i = 1; i < points.length; i++) {
+    const line = new LineSegment(last, points[i]);
     if (line.arcLength > 0) {
       profile.segments.push(line);
       profile.arcLength += line.arcLength;
     }
-    if (circle.arcLength > 0) {
-      profile.segments.push(circle);
-      profile.arcLength += circle.arcLength;
-    }
-
-    profile.minSin = Math.min(profile.minSin, Math.abs(angleSin));
-
-    last = center.add(endVector.scale(pointOffsetDistance));
+    last = points[i];
   }
 
-  const line = new LineSegment(last, points[points.length - 1]);
-  if (line.arcLength > 0) {
-    profile.segments.push(line);
-    profile.arcLength += line.arcLength;
+  if (closed && points.length > 1) {
+    const closing = new LineSegment(points[points.length - 1], points[0]);
+    if (closing.arcLength > 0) {
+      profile.segments.push(closing);
+      profile.arcLength += closing.arcLength;
+    }
+  }
+
+  for (let i = 1; i + 1 < points.length; i++) {
+    const a = points[i - 1];
+    const b = points[i];
+    const c = points[i + 1];
+    const ab = a.sub(b).normalized.safe;
+    const cb = c.sub(b).normalized.safe;
+    const angleBetween = Math.acos(clamp(-1, 1, ab.dot(cb)));
+    const angleSin = Math.sin(angleBetween / 2);
+    profile.minSin = Math.min(profile.minSin, Math.abs(angleSin));
+  }
+
+  if (closed && points.length > 2) {
+    const a = points[points.length - 2];
+    const b = points[points.length - 1];
+    const c = points[0];
+    const ab = a.sub(b).normalized.safe;
+    const cb = c.sub(b).normalized.safe;
+    const angleBetween = Math.acos(clamp(-1, 1, ab.dot(cb)));
+    const angleSin = Math.sin(angleBetween / 2);
+    profile.minSin = Math.min(profile.minSin, Math.abs(angleSin));
   }
 
   return profile;
