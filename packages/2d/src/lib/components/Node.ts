@@ -524,7 +524,7 @@ export class Node implements Promisable<Node> {
   }
 
   protected view2D: View2D;
-  
+  private stateStack: NodeState[] = [];
   protected realChildren: Node[] = [];
   protected hasSpawnedChildren = false;
   private unregister: () => void;
@@ -1173,6 +1173,7 @@ export class Node implements Promisable<Node> {
       return;
     }
 
+    this.stateStack = [];
     this.unregister();
     this.unregister = null!;
     for (const {signal} of this) {
@@ -1836,12 +1837,6 @@ export class Node implements Promisable<Node> {
     return all(...tasks);
   }
 
-  public save(): void {}
-
-  public restore(duration?: number, timing: TimingFunction = easeInOutCubic): ThreadGenerator {
-    return all();
-  }
-
   /**
    * Push a snapshot of the node's current state onto the node's state stack.
    *
@@ -1850,7 +1845,75 @@ export class Node implements Promisable<Node> {
    * node's current state and later restore it. It is possible to store more
    * than one state by calling `save` method multiple times.
    */
-  
+  public save(): void {
+    this.stateStack.push(this.getState());
+  }
+
+  /**
+   * Restore the node to its last saved state.
+   *
+   * @remarks
+   * This method can be used together with the {@link save} method to restore a
+   * node to a previously saved state. Restoring a node to a previous state
+   * removes that state from the state stack.
+   *
+   * @example
+   * ```tsx
+   * const node = <Circle width={100} height={100} fill={"lightseagreen"} />
+   *
+   * view.add(node);
+   *
+   * // Save the node's current state
+   * node.save();
+   *
+   * // Modify some of the node's properties
+   * yield* node.scale(2, 1);
+   * yield* node.fill('hotpink', 1);
+   *
+   * // Restore the node to its saved state
+   * node.restore();
+   * ```
+   */
+  public restore(): void;
+  /**
+   * Tween the node to its last saved state.
+   *
+   * @remarks
+   * This method can be used together with the {@link save} method to restore a
+   * node to a previously saved state. Restoring a node to a previous state
+   * removes that state from the state stack.
+   *
+   * @example
+   * ```tsx
+   * const node = <Circle width={100} height={100} fill={"lightseagreen"} />
+   *
+   * view.add(node);
+   *
+   * // Save the node's current state
+   * node.save();
+   *
+   * // Modify some of the node's properties
+   * yield* node.scale(2, 1);
+   * yield* node.fill('hotpink', 1);
+   *
+   * // Tween the node to its saved state over 1 second
+   * yield* node.restore(1);
+   * ```
+   *
+   * @param duration - The duration of the transition.
+   * @param timing - The timing function to use for the transition.
+   */
+  public restore(duration: number, timing?: TimingFunction): ThreadGenerator;
+  public restore(
+    duration?: number,
+    timing: TimingFunction = easeInOutCubic,
+  ): ThreadGenerator | void {
+    const state = this.stateStack.pop();
+
+    if (state !== undefined) {
+      return this.applyState(state, duration!, timing);
+    }
+  }
 
   public *[Symbol.iterator]() {
     for (const key in this.properties) {
