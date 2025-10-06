@@ -156,16 +156,7 @@ export class Img extends Rect {
   }
 
   protected override desiredSize(): SerializedVector2<DesiredLength> {
-    const custom = super.desiredSize();
-    if (custom.x === null && custom.y === null) {
-      const image = this.image();
-      return {
-        x: image.naturalWidth,
-        y: image.naturalHeight,
-      };
-    }
-
-    return custom;
+    return super.desiredSize();
   }
 
   @computed()
@@ -259,10 +250,8 @@ about working with images.`,
 
   protected override applyFlex() {
     super.applyFlex();
-    const image = this.image();
-    this.element.style.aspectRatio = (
-      this.ratio() ?? image.naturalWidth / image.naturalHeight
-    ).toString();
+    const ratio = this.ratio();
+    this.element.style.aspectRatio = ratio === null ? '' : ratio.toString();
   }
 
   /**

@@ -80,16 +80,7 @@ export class Video extends Media {
   }
 
   protected override desiredSize(): SerializedVector2<DesiredLength> {
-    const custom = super.desiredSize();
-    if (custom.x === null && custom.y === null) {
-      const image = this.video();
-      return {
-        x: image.videoWidth,
-        y: image.videoHeight,
-      };
-    }
-
-    return custom;
+    return super.desiredSize();
   }
 
   protected mediaElement(): HTMLVideoElement {
@@ -308,10 +299,8 @@ export class Video extends Media {
 
   protected override applyFlex() {
     super.applyFlex();
-    const video = this.video();
-    this.element.style.aspectRatio = (
-      this.ratio() ?? video.videoWidth / video.videoHeight
-    ).toString();
+    const ratio = this.ratio();
+    this.element.style.aspectRatio = ratio === null ? '' : ratio.toString();
   }
 
   public override remove() {
