@@ -52,14 +52,14 @@ compute_hash() {
 hash_a=$(compute_hash "$video_a")
 hash_b=$(compute_hash "$video_b")
 
-if [[ "$hash_a" == "$hash_b" ]]; then
-  echo "Video hashes match" >&2
-  printf '%s\n' "$hash_a"
-  exit 0
-else
-  echo "Video hashes differ" >&2
+if [[ "$hash_a" != "$hash_b" ]]; then
+  echo "Video hashes differ (as expected)" >&2
   echo "A: $hash_a" >&2
   echo "B: $hash_b" >&2
+  exit 0
+else
+  echo "Video hashes match (unexpected)" >&2
+  printf '%s\n' "$hash_a"
   exit 1
 fi
 
