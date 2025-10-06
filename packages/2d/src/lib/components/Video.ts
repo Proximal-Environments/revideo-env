@@ -310,7 +310,7 @@ export class Video extends Media {
     super.applyFlex();
     const video = this.video();
     this.element.style.aspectRatio = (
-      this.ratio() ?? video.videoWidth / video.videoHeight
+      video.videoWidth / video.videoHeight
     ).toString();
   }
 
