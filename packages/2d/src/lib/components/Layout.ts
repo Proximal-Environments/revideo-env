@@ -933,7 +933,8 @@ export class Layout extends Node {
     this.element.style.minWidth = this.parseLength(this.minWidth());
     this.element.style.maxHeight = this.parseLength(this.maxHeight());
     this.element.style.minHeight = this.parseLength(this.minHeight()!);
-    this.element.style.aspectRatio = '';
+    this.element.style.aspectRatio =
+      this.ratio() === null ? '' : this.ratio()!.toString();
 
     this.element.style.marginTop = this.parsePixels(this.margin.top());
     this.element.style.marginBottom = this.parsePixels(this.margin.bottom());

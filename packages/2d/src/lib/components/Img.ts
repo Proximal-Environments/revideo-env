@@ -261,7 +261,7 @@ about working with images.`,
     super.applyFlex();
     const image = this.image();
     this.element.style.aspectRatio = (
-      image.naturalWidth / image.naturalHeight
+      this.ratio() ?? image.naturalWidth / image.naturalHeight
     ).toString();
   }
 
