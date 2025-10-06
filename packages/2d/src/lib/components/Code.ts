@@ -30,7 +30,6 @@ import {
   CodeCursor,
   codeSignal,
   CodeSignalContext,
-  findAllCodeRanges,
   isPointInCodeSelection,
   lines,
   parseCodeSelection,
@@ -318,42 +317,7 @@ export class Code extends Shape {
     ).toSignal();
   }
 
-  /**
-   * Find all code ranges that match the given pattern.
-   *
-   * @param pattern - Either a string or a regular expression to match.
-   */
-  public findAllRanges(pattern: string | RegExp): CodeRange[] {
-    return findAllCodeRanges(this.parsed(), pattern);
-  }
-
-  /**
-   * Find the first code range that matches the given pattern.
-   *
-   * @param pattern - Either a string or a regular expression to match.
-   */
-  public findFirstRange(pattern: string | RegExp): CodeRange {
-    return (
-      findAllCodeRanges(this.parsed(), pattern, 1)[0] ?? [
-        [0, 0],
-        [0, 0],
-      ]
-    );
-  }
-
-  /**
-   * Find the last code range that matches the given pattern.
-   *
-   * @param pattern - Either a string or a regular expression to match.
-   */
-  public findLastRange(pattern: string | RegExp): CodeRange {
-    return (
-      findAllCodeRanges(this.parsed(), pattern).at(-1) ?? [
-        [0, 0],
-        [0, 0],
-      ]
-    );
-  }
+  
 
   /**
    * Return the bounding box of the given point (character) in the code.
