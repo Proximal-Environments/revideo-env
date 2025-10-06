@@ -123,13 +123,6 @@ export class Grid extends Shape {
   }
 
   private mapPoints(start: number, end: number): [number, number] {
-    let from = map(start, end, this.start());
-    let to = map(start, end, this.end());
-
-    if (to < from) {
-      [from, to] = [to, from];
-    }
-
-    return [from, to];
+    return [start, end];
   }
 }

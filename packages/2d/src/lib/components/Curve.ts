@@ -265,12 +265,8 @@ export abstract class Curve extends Shape {
     const path = new Path2D();
     let subpath = new Path2D();
     const profile = this.profile();
-
-    let start = this.percentageToDistance(this.start());
-    let end = this.percentageToDistance(this.end());
-    if (start > end) {
-      [start, end] = [end, start];
-    }
+    let start = 0;
+    let end = this.baseArcLength();
 
     const distance = end - start;
     const arrowSize = Math.min(distance / 2, this.arrowSize());
@@ -331,13 +327,7 @@ export abstract class Curve extends Shape {
       }
     }
 
-    if (
-      this.closed() &&
-      this.start.isInitial() &&
-      this.end.isInitial() &&
-      this.startOffset.isInitial() &&
-      this.endOffset.isInitial()
-    ) {
+    if (this.closed()) {
       subpath.closePath();
     }
     this.processSubpath(subpath, startPoint, endPoint);
