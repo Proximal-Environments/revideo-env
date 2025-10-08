@@ -24,7 +24,7 @@ import {
   all,
   clamp,
   createSignal,
-  easeInOutCubic,
+  linear,
   isReactive,
   modify,
   threadable,
@@ -1815,7 +1815,7 @@ export class Node implements Promisable<Node> {
   public applyState(
     state: NodeState,
     duration?: number,
-    timing: TimingFunction = easeInOutCubic,
+    timing: TimingFunction = linear,
   ): ThreadGenerator | void {
     if (duration === undefined) {
       for (const key in state) {
@@ -1906,7 +1906,7 @@ export class Node implements Promisable<Node> {
   public restore(duration: number, timing?: TimingFunction): ThreadGenerator;
   public restore(
     duration?: number,
-    timing: TimingFunction = easeInOutCubic,
+    timing: TimingFunction = linear,
   ): ThreadGenerator | void {
     const state = this.stateStack.pop();
 

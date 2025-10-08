@@ -9,7 +9,7 @@ import {
   SignalContext,
   all,
   deepLerp,
-  easeInOutCubic,
+  linear,
   unwrap,
 } from '@revideo/core';
 import type {FilterName} from '../partials';
@@ -40,7 +40,7 @@ export class FiltersSignalContext<TOwner> extends SignalContext<
         value: (
           newValue?: SignalValue<number>,
           duration?: number,
-          timingFunction: TimingFunction = easeInOutCubic,
+          timingFunction: TimingFunction = linear,
         ) => {
           if (newValue === undefined) {
             return (
