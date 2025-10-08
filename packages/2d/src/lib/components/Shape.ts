@@ -71,7 +71,6 @@ export abstract class Shape extends Layout {
   }
 
   protected applyStyle(context: CanvasRenderingContext2D) {
-    context.fillStyle = resolveCanvasStyle(this.fill(), context);
     context.strokeStyle = resolveCanvasStyle(this.stroke(), context);
     context.lineWidth = this.lineWidth();
     context.lineJoin = this.lineJoin();
@@ -96,17 +95,10 @@ export abstract class Shape extends Layout {
   protected drawShape(context: CanvasRenderingContext2D) {
     const path = this.getPath();
     const hasStroke = this.lineWidth() > 0 && this.stroke() !== null;
-    const hasFill = this.fill() !== null;
     context.save();
     this.applyStyle(context);
     this.drawRipple(context);
-    if (this.strokeFirst()) {
-      hasStroke && context.stroke(path);
-      hasFill && context.fill(path);
-    } else {
-      hasFill && context.fill(path);
-      hasStroke && context.stroke(path);
-    }
+    hasStroke && context.stroke(path);
     context.restore();
   }
 
