@@ -107,7 +107,13 @@ export class TxtLeaf extends Shape {
   ) {
     const y = box.y;
     text = text.replace(/\s+/g, ' ');
-    if (this.lineWidth() > 0) {
+    if (this.lineWidth() <= 0) {
+      context.fillText(text, box.x, y);
+    } else if (this.strokeFirst()) {
+      context.strokeText(text, box.x, y);
+      context.fillText(text, box.x, y);
+    } else {
+      context.fillText(text, box.x, y);
       context.strokeText(text, box.x, y);
     }
   }
