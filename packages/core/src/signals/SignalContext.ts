@@ -1,7 +1,7 @@
 import {run, waitFor} from '../flow';
 import type {ThreadGenerator} from '../threading';
 import type {InterpolationFunction, TimingFunction} from '../tweening';
-import {linear, tween} from '../tweening';
+import {easeInOutCubic, tween} from '../tweening';
 import {errorToLog, useLogger} from '../utils';
 import {DependencyContext} from './DependencyContext';
 import {DEFAULT} from './symbols';
@@ -153,7 +153,7 @@ export class SignalContext<
   protected override invoke(
     value?: SignalValue<TSetterValue> | typeof DEFAULT,
     duration?: number,
-    timingFunction: TimingFunction = linear,
+    timingFunction: TimingFunction = easeInOutCubic,
     interpolationFunction: InterpolationFunction<TValue> = this.interpolation,
   ) {
     if (value === undefined) {
